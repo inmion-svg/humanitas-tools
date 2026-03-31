@@ -697,11 +697,11 @@ async function generateDoc(){
     const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
 
     if(docKey === 'ensayo'){
-      // Use Haiku for speed — generates 3-4x faster than Sonnet, fits in 60s timeout
+      // Haiku is 10x faster than Sonnet — 8000 tokens completes in ~20s well within 60s limit
       const r = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
           model:"claude-haiku-4-5-20251001",
-          max_tokens:5000,
+          max_tokens:8000,
           messages:[{role:"user",content:prompt}]
         })});
       const d = await r.json();
@@ -884,211 +884,83 @@ ${REGLA_FUENTES}`;
   // ── ENSAYO ──────────────────────────────────────────
   const ensayo_financiero = `${ctx}
 
-Escribe un ENSAYO DE ESTUDIO PROFUNDO Y EXHAUSTIVO para que el profesor domine completamente el tema antes de impartir una clase de 3 horas. El ensayo debe ser suficientemente completo para que el profesor pueda contestar cualquier pregunta durante la clase y conectar el tema con el mundo real. No hay límite de palabras — prioriza la profundidad y completitud sobre la brevedad.
-
-Estructura obligatoria:
+Escribe un ENSAYO DE ESTUDIO PROFUNDO Y COMPLETO para que el profesor domine el tema y pueda impartir una clase de 3 horas con total seguridad. Sin límite de palabras — prioriza la profundidad y completitud.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. CONTEXTO HISTÓRICO Y VISIÓN MACRO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Explica de dónde viene este concepto: cuándo surgió, quiénes lo desarrollaron, cómo ha evolucionado hasta hoy. Incluye el contexto económico global y específicamente en México y Latinoamérica. ¿Por qué este tema es relevante hoy en el mundo de los negocios?
+Origen del concepto, cómo evolucionó históricamente, relevancia actual en México y Latinoamérica.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 2. CONCEPTOS CLAVE Y DEFINICIONES PRECISAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Define con precisión absoluta todos los conceptos fundamentales del tema. Para cada concepto:
-• Definición exacta y técnica (no vaga ni general)
-• De dónde viene el término o concepto
-• Cómo se usa en la práctica empresarial
-• Qué lo confunde con otros conceptos similares (errores comunes)
+Todos los términos fundamentales con definición exacta, origen del concepto y cómo se usa en la práctica.
+Formato: • Término: definición precisa en 3-4 líneas.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 3. DESARROLLO TEÓRICO PROFUNDO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Desarrolla los modelos, teorías y marcos conceptuales principales del tema. Incluye fórmulas o esquemas si aplican. Explica los autores académicos más importantes que han estudiado este tema y cuáles son sus aportaciones clave. Conecta la teoría con su aplicación práctica.
+Modelos, teorías y marcos conceptuales. Autores principales y sus aportaciones. Conexión teoría-práctica.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 4. DATOS Y ESTADÍSTICAS ACTUALES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Presenta 5-7 cifras reales y recientes (últimos 3 años) que ilustren la magnitud e importancia del tema. Prioriza datos de México, pero incluye referencias internacionales cuando den contexto. Cada dato debe incluir su fuente completa en formato APA.
+Mínimo 5 cifras reales y recientes (últimos 3 años). Fuentes: Banxico, CNBV, INEGI, SE, Banco Mundial, FMI. Cada dato con su fuente en formato APA.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 5. CASOS DE EMPRESAS MEXICANAS REALES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Desarrolla 3 casos concretos y detallados de empresas mexicanas reales donde este tema sea central. Para cada caso:
-• Nombre de la empresa y contexto
-• El problema o decisión financiera específica
-• Cómo aplicaron (o fallaron en aplicar) el concepto del tema
-• Resultado medible: cifras, impacto en valor, lección aprendida
-Usa empresas conocidas: FEMSA, Bimbo, CEMEX, Banorte, BBVA México, Liverpool, Walmart México, Soriana, América Móvil, Pemex, etc.
+Mínimo 2 casos concretos y detallados: nombre de empresa, situación, decisión tomada, resultado medible con cifras.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. CONEXIONES CON EL CURSO
+6. PREGUNTAS DIFÍCILES CON RESPUESTAS COMPLETAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-¿Cómo se relaciona este tema con los temas anteriores del Bloque Financiero? ¿Con qué temas futuros conecta? ¿Cómo encaja dentro de la visión integral de las finanzas corporativas?
+Mínimo 5 preguntas desafiantes que pueden hacer alumnos ejecutivos con experiencia laboral. Respuesta directa y bien fundamentada para cada una.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-7. PREGUNTAS DIFÍCILES DE LOS ALUMNOS — CON RESPUESTAS
+7. BIBLIOGRAFÍA COMPLETA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Lista las 6-8 preguntas más desafiantes que pueden hacer los alumnos ejecutivos (que tienen experiencia laboral y cuestionan desde la práctica), con respuestas completas, directas y bien fundamentadas para cada una. Incluye también posibles objeciones o contraejemplos y cómo responderlos.
+Mínimo 6 fuentes en formato APA. Incluye libros de la bibliografía prioritaria más fuentes institucionales verificables.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-8. BIBLIOGRAFÍA COMPLETA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Lista todas las fuentes citadas en el ensayo en formato APA. Incluye al menos 6 fuentes: combina los libros de la bibliografía prioritaria de la materia con fuentes institucionales (Banxico, CNBV, INEGI, Banco Mundial) y artículos académicos relevantes.
-
-TONO Y ESTILO:
-- Académico pero claro y directo. Sin relleno ni frases vacías.
-- Escribe como si estuvieras explicándole al profesor, no al alumno.
-- Cada sección debe ser sustancial — no listas cortas, sino párrafos desarrollados.
-- Los datos siempre con fuente. Los ejemplos siempre con nombre real de empresa.
-- IMPORTANTE: El ensayo DEBE terminar siempre con la sección 8 BIBLIOGRAFÍA COMPLETA.
-  Si el espacio es limitado, resume las secciones intermedias pero NUNCA omitas la bibliografía.`;
+ESTILO: Académico pero directo. Datos siempre con fuente. Empresas siempre con nombre real.
+IMPORTANTE: Completa TODAS las secciones. No te detengas antes de la Bibliografía.`;`;
 
   // ── ENSAYO FUNDAMENTOS (2 horas, 1500 palabras) ────
   const ensayo_fundamentos = `${ctx}
 
-Escribe un ENSAYO DE ESTUDIO de aproximadamente 1,500 palabras para que el profesor domine el tema antes de impartir una clase de 2 horas. Debe ser completo pero enfocado — cubre lo esencial con profundidad sin extenderse en detalles secundarios.
-
-Estructura obligatoria:
+Escribe un ENSAYO DE ESTUDIO completo para que el profesor domine el tema antes de una clase de 2 horas. Aproximadamente 2,000 palabras.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. CONTEXTO HISTÓRICO Y VISIÓN GLOBAL (250 palabras)
+1. CONTEXTO HISTÓRICO Y VISIÓN GLOBAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Origen del concepto, evolución histórica y relevancia actual en el comercio internacional. Énfasis en el contexto de México como economía abierta y su posición en el comercio global (TMEC, relación con EUA, exportaciones manufactureras).
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. CONCEPTOS CLAVE Y DEFINICIONES PRECISAS (300 palabras)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Todos los términos fundamentales del tema con definición exacta y técnica. Incluye cómo se usan en la práctica empresarial internacional.
+Origen y evolución del concepto. Relevancia actual en México como economía abierta y su posición en el comercio global (TMEC, relación con EUA).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. DATOS Y ESTADÍSTICAS ACTUALES (200 palabras)
+2. CONCEPTOS CLAVE Y DEFINICIONES PRECISAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4-5 cifras reales y recientes (últimos 3 años) con fuente institucional verificable. Prioriza datos de México en el contexto internacional: comercio exterior, IED, exportaciones, etc.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. CASO EMPRESARIAL REAL (250 palabras)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Un caso concreto y detallado de una empresa mexicana o multinacional en México que ilustre el tema. Qué hicieron, cuándo, por qué y con qué resultado medible.
+Todos los términos fundamentales con definición exacta y ejemplo de aplicación real.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. PREGUNTAS FRECUENTES DE LOS ALUMNOS (300 palabras)
+3. DATOS Y ESTADÍSTICAS ACTUALES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Las 4-5 preguntas más comunes o desafiantes sobre el tema, con respuesta directa y bien fundamentada para cada una.
+Mínimo 4 cifras reales y recientes con fuente institucional verificable (SE, Banxico, OMC, Banco Mundial). Cada dato con su fuente APA.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. BIBLIOGRAFÍA (200 palabras)
+4. CASO EMPRESARIAL REAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4-5 fuentes en formato APA: libros de la bibliografía prioritaria + fuentes institucionales (SE, Banxico, OMC, Banco Mundial).
+Un caso concreto y detallado de empresa mexicana o multinacional en México. Qué hicieron, cuándo, resultado medible con cifras.
 
-TONO: Académico, directo, sin relleno. Cada dato con fuente. Ejemplos con nombres reales.
-- IMPORTANTE: El ensayo DEBE terminar siempre con la sección BIBLIOGRAFÍA completa en formato APA.`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. PREGUNTAS FRECUENTES CON RESPUESTAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4-5 preguntas comunes de alumnos con respuesta directa y bien fundamentada.
 
-  // ── PRESENTACIÓN ────────────────────────────────────
-  const presentacion = `${ctx}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. BIBLIOGRAFÍA COMPLETA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mínimo 5 fuentes en formato APA: bibliografía prioritaria de la materia más fuentes institucionales.
 
-Genera el CONTENIDO COMPLETO Y DETALLADO para una presentación de clase de ${duracion}.
-
-El profesor usa presentaciones minimalistas (una idea por diapositiva), así que entrega el CONTENIDO de cada diapositiva, no el diseño. Para cada diapositiva indica:
-- El título (corto, impactante)
-- El contenido principal: dato, concepto, pregunta o idea central
-- Una nota para el profesor: qué decir, qué ejemplo usar, cuánto tiempo dedicar
-
-Estructura:
-
-DIAPOSITIVA 1 — APERTURA (5 min)
-Pregunta detonadora que conecte el tema con la experiencia real de los alumnos. Una sola pregunta que genere discusión antes de explicar nada.
-
-DIAPOSITIVAS 2-3 — CONTEXTO (15 min)
-El por qué del tema. Datos actuales que justifiquen su importancia. Una cifra impactante de México o Latinoamérica.
-
-DIAPOSITIVAS 4-7 — DESARROLLO CONCEPTUAL (${esFundamentos ? "40 min" : "70 min"})
-Los conceptos clave uno por diapositiva. Para cada uno: definición en una frase, ejemplo real, aplicación práctica.
-
-DIAPOSITIVA 8 — CASO EMPRESARIAL REAL (${esFundamentos ? "20 min" : "30 min"})
-Una empresa mexicana real. Datos concretos. Qué decidieron, por qué, qué resultado tuvo.
-
-DIAPOSITIVA 9 — ACTIVIDAD (${esFundamentos ? "25 min" : "40 min"})
-Dinámica grupal o ejercicio práctico conectado al tema. Instrucciones exactas para el profesor.
-
-DIAPOSITIVA 10 — CIERRE Y REFLEXIÓN (10 min)
-Los 3 puntos que deben quedarse en la memoria. La pregunta de reflexión final.
-
-FUENTES: Todos los datos y estadísticas presentados deben provenir de fuentes académicas o institucionales verificables. Cítalas al pie de cada diapositiva donde aparezcan.`;
-
-  // ── BRIEF ───────────────────────────────────────────
-  const brief = `${ctx}
-
-Redacta el BRIEF DE CLASE — guía de conducción para el profesor durante la sesión de ${duracion}.
-
-Formato: tres bloques temporales claros y accionables. El profesor debe poder seguirlo durante la clase sin perder el hilo.
-
-━━ INICIO (${esFundamentos ? "15 min" : "20 min"})
-• Pregunta detonadora exacta para abrir la clase — escríbela textualmente
-• Cómo conectar con la clase anterior (qué recordar o preguntar)
-• Actividad de calentamiento: qué hacer, cómo organizarlo, qué esperar de los alumnos
-• Qué escribir en el pizarrón o mostrar para enmarcar el tema
-
-━━ DESARROLLO (${esFundamentos ? "80 min" : "130 min"})
-Secuencia minuto a minuto de los subtemas:
-• En qué orden presentar los conceptos y por qué ese orden
-• Qué ejemplo usar para cada concepto (ejemplos específicos, no genéricos)
-• En qué momento hacer pausa para preguntas
-• Qué dinámica o ejercicio incluir para verificar comprensión
-• Señales de alerta: si los alumnos no entienden X, explicar con Y
-• Cómo manejar a alumnos ejecutivos que cuestionen desde su experiencia laboral
-
-━━ CIERRE (${esFundamentos ? "25 min" : "30 min"})
-• Las 3 ideas que deben quedarse en la memoria de los alumnos — escríbelas textualmente
-• Cómo presentar la pregunta de reflexión (instrucciones exactas al alumno)
-• Cómo conectar con el tema de la siguiente clase
-• Tarea o lectura recomendada si aplica
-
-TONO: Instrucciones directas para el profesor, no para el alumno. Concreto y accionable. Sin teoría — solo qué hacer y cuándo.
-${REGLA_FUENTES}`;
-
-  // ── REFLEXIÓN ───────────────────────────────────────
-  const reflexion = `${ctx}
-
-Genera la PREGUNTA DE REFLEXIÓN FINAL de la clase y todos los materiales necesarios para evaluarla y retroalimentarla.
-
-━━ PREGUNTA DE REFLEXIÓN
-Una sola pregunta de alto impacto que:
-• Conecte el tema con una situación real, actual y relevante para el alumno
-• No tenga una única respuesta correcta — invite al pensamiento crítico y a la argumentación
-• Pueda responderse en exactamente 50 palabras con profundidad real
-• Sea diferente a preguntas de memorización — debe requerir análisis y posición personal
-• Para alumnos ejecutivos: que conecte con su experiencia laboral real
-
-━━ INSTRUCCIÓN EXACTA PARA EL ALUMNO
-Escribe textualmente cómo presentarás la pregunta al grupo. Incluye:
-• El enunciado completo de la pregunta
-• La instrucción de formato: "Responde en exactamente 50 palabras"
-• El tiempo que tienen para responder
-• Si es individual o en equipo
-
-━━ RÚBRICA DE EVALUACIÓN (100 puntos)
-Criterio 1 — Comprensión conceptual (25 pts)
-Qué demuestra una respuesta excelente / regular / insuficiente en este criterio.
-
-Criterio 2 — Argumentación y pensamiento crítico (25 pts)
-Qué demuestra una respuesta excelente / regular / insuficiente.
-
-Criterio 3 — Aplicación práctica o conexión con la realidad (25 pts)
-Qué demuestra una respuesta excelente / regular / insuficiente.
-
-Criterio 4 — Claridad, precisión y redacción en 50 palabras (25 pts)
-Qué demuestra una respuesta excelente / regular / insuficiente.
-
-━━ EJEMPLOS DE RESPUESTA
-Respuesta EXCELENTE (muestra exactamente cómo se ve una respuesta de 50 palabras que obtenga 90-100 pts)
-Respuesta REGULAR (muestra cómo se ve una respuesta de 50 palabras que obtenga 60-70 pts)
-Respuesta INSUFICIENTE (muestra cómo se ve una respuesta de 50 palabras que obtenga menos de 60 pts)
-
-━━ RETROALIMENTACIÓN SUGERIDA
-Qué decirle al grupo después de leer sus respuestas. Puntos clave a reforzar y errores comunes a corregir.
-${REGLA_FUENTES}`;
+IMPORTANTE: Completa TODAS las secciones incluyendo la Bibliografía. Datos siempre con fuente. Empresas con nombre real.`;`;
 
   const map = {
     presentacion,
