@@ -697,27 +697,23 @@ async function generateDoc(){
     const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
 
     if(docKey === 'ensayo'){
-      // Two-part generation — each call ~3000 tokens within 60s timeout
-      const p1 = prompt + "\n\nIMPORTANTE: Genera UNICAMENTE las secciones 1, 2 y 3 completas y detalladas. Termina con '---FIN-PARTE-1---'";
-      const p2 = prompt + "\n\nIMPORTANTE: Genera UNICAMENTE las secciones 4, 5, 6, 7 y 8 completas y detalladas. Empieza directamente con la seccion 4. Asegurate de incluir la bibliografía completa al final.";
-
-      btn.textContent = "✨ Generando parte 1 de 2...";
+      // Part 1: sections 1-3
+      const p1 = prompt + "\n\nINSTRUCCION: Genera SOLO las secciones 1, 2 y 3. Se detallado y completo en cada una.";
+      btn.textContent = "✨ Generando (1/2)...";
       const r1 = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[{role:"user",content:p1}]})});
       const d1 = await r1.json();
       if(d1.error) throw new Error(d1.error.message);
-      const t1 = (d1.content?.[0]?.text || "").replace("---FIN-PARTE-1---","").trim();
+      const t1 = (d1.content?.[0]?.text||"").trim();
 
-      btn.textContent = "✨ Generando parte 2 de 2...";
-      // Send part 1 as context so part 2 continues correctly
+      // Part 2: sections 4-8 as independent call
+      const p2 = prompt + "\n\nINSTRUCCION: Genera SOLO las secciones 4, 5, 6, 7 y 8. Empieza con '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n4. DATOS Y ESTADISTICAS ACTUALES'. Termina siempre con la bibliografía completa.";
+      btn.textContent = "✨ Generando (2/2)...";
       const r2 = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[
-          {role:"user",content:p2},
-          {role:"assistant",content:t1.trim()}
-        ]})});
+        body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[{role:"user",content:p2}]})});
       const d2 = await r2.json();
       if(d2.error) throw new Error(d2.error.message);
-      const t2 = (d2.content?.[0]?.text || "").trim();
+      const t2 = (d2.content?.[0]?.text||"").trim();
 
       document.getElementById("gen-result").value = t1 + "\n\n" + t2;
     } else {
