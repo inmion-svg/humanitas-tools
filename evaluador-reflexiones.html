@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluador de Reflexiones · Humanitas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090E;--navy:#0C1422;--navy2:#101A2C;--blue:#1A3A6A;
+  --cyan:#00C8E0;--gold:#E8A830;--green:#28C878;--red:#E85040;
+  --white:#F0F4FC;--lgray:#C0CCD8;--mgray:#6A7A8A;--dgray:#2A3A4A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Crimson Pro',serif;background:var(--bg);color:var(--white);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 40% at 80% 0%,#1A3A6A18,transparent 60%),
+             radial-gradient(ellipse 40% 40% at 0% 100%,#00C8E010,transparent 60%);}
+
+header{background:var(--navy);border-bottom:1px solid #1A3A6A44;padding:0 32px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--cyan);letter-spacing:1px;}
+.logo span{color:var(--mgray);font-size:13px;font-family:'DM Mono',monospace;margin-left:12px;letter-spacing:2px;}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;}
+
+/* Steps indicator */
+.steps{display:flex;gap:0;margin-bottom:36px;}
+.step{display:flex;align-items:center;gap:8px;padding:10px 20px;font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mgray);
+  border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;}
+.step.active{color:var(--cyan);border-color:var(--cyan);}
+.step.done{color:var(--green);border-color:var(--green);}
+.step-num{width:22px;height:22px;border-radius:50%;border:1px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+/* Panels */
+.panel{display:none;animation:fadeIn .3s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);margin-bottom:6px;letter-spacing:.5px;}
+.sub{font-size:14px;color:var(--mgray);margin-bottom:24px;font-style:italic;}
+
+/* Cards */
+.card{background:var(--navy);border:1px solid #1A3A6A55;border-radius:12px;padding:22px;margin-bottom:16px;}
+.lbl{display:block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--mgray);margin-bottom:8px;}
+
+/* Inputs */
+textarea,input[type=text]{width:100%;background:#070C14;border:1px solid #1A3A6A;color:var(--white);
+  border-radius:8px;padding:12px 16px;font-family:'Crimson Pro',serif;font-size:15px;
+  outline:none;transition:border-color .2s;resize:vertical;}
+textarea:focus,input[type=text]:focus{border-color:var(--cyan);}
+textarea{min-height:100px;line-height:1.6;}
+
+/* Drop zone */
+.dropzone{border:2px dashed #1A3A6A;border-radius:12px;padding:40px;text-align:center;
+  cursor:pointer;transition:all .2s;position:relative;}
+.dropzone:hover,.dropzone.drag{border-color:var(--cyan);background:#00C8E008;}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.dropzone-icon{font-size:36px;margin-bottom:12px;display:block;}
+.dropzone-txt{font-size:16px;color:var(--lgray);margin-bottom:6px;}
+.dropzone-sub{font-size:13px;color:var(--mgray);}
+
+/* Buttons */
+.btn{border:none;border-radius:8px;padding:11px 22px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;
+  text-transform:uppercase;transition:all .2s;font-weight:500;}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),#007A8A);color:#070C14;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#A87820);color:#070C14;}
+.btn-green{background:linear-gradient(135deg,var(--green),#0A6030);color:#070C14;}
+.btn-ghost{background:transparent;border:1px solid #1A3A6A;color:var(--mgray);}
+.btn:hover{opacity:.85;transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* Progress */
+.progress-bar{height:4px;background:#1A2535;border-radius:4px;margin:12px 0;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));
+  border-radius:4px;transition:width .4s ease;}
+
+/* Results table */
+.results-header{display:grid;grid-template-columns:2fr 4fr 1fr 1fr 2fr;gap:8px;
+  padding:10px 14px;background:#0A1420;border-radius:8px 8px 0 0;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mgray);}
+.result-row{display:grid;grid-template-columns:2fr 4fr 1fr 1fr 2fr;gap:8px;
+  padding:14px;border-bottom:1px solid #0D1A2A;align-items:start;transition:background .15s;}
+.result-row:hover{background:#0A1420;}
+.result-row:last-child{border-bottom:none;}
+.result-name{font-size:14px;color:var(--white);font-weight:600;}
+.result-resp{font-size:13px;color:var(--lgray);line-height:1.5;}
+.result-score{font-family:'Bebas Neue',sans-serif;font-size:24px;text-align:center;}
+.result-comment{font-size:12px;color:var(--mgray);line-height:1.5;font-style:italic;}
+.score-ex{color:var(--green);}
+.score-mb{color:var(--cyan);}
+.score-sf{color:var(--gold);}
+.score-er{color:var(--red);}
+
+/* Stats bar */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat{background:var(--navy);border-radius:10px;padding:16px;text-align:center;border:1px solid #1A3A6A44;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;margin-bottom:2px;}
+.stat-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mgray);}
+
+/* CSV preview */
+.csv-preview{background:#070C14;border:1px solid #1A3A6A;border-radius:8px;padding:14px;
+  max-height:180px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:12px;color:var(--lgray);line-height:1.8;}
+.csv-row-item{padding:4px 8px;border-bottom:1px solid #0D1A2A;}
+.csv-row-item:last-child{border:none;}
+
+/* Rubric grid */
+.rubric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rubric-item{background:#070C14;border:1px solid #1A3A6A44;border-radius:8px;padding:14px;}
+.rubric-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:6px;}
+.rubric-pts{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
+
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
+  padding:2px 8px;border-radius:20px;border:1px solid;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Evaluador de Reflexiones <span>Universidad Humanitas</span></div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mgray);letter-spacing:2px;" id="counter-header"></div>
+    <button onclick="resetAll()" class="btn btn-ghost" style="font-size:10px;padding:5px 12px;letter-spacing:1px;">
+      ↺ Nueva evaluación
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step1-btn" onclick="goStep(1)">
+      <span class="step-num">1</span>Configurar
+    </div>
+    <div class="step" id="step2-btn" onclick="goStep(2)">
+      <span class="step-num">2</span>Cargar respuestas
+    </div>
+    <div class="step" id="step3-btn" onclick="goStep(3)">
+      <span class="step-num">3</span>Evaluar
+    </div>
+    <div class="step" id="step4-btn" onclick="goStep(4)">
+      <span class="step-num">4</span>Resultados
+    </div>
+  </div>
+
+  <!-- PANEL 1: Configurar ─────────────────────────────────── -->
+  <div class="panel active" id="panel1">
+    <h2>Configurar evaluación</h2>
+    <p class="sub">Define la pregunta y la rúbrica antes de cargar las respuestas</p>
+
+    <div class="card">
+      <label class="lbl">Materia</label>
+      <input type="text" id="cfg-materia" placeholder="ej. Bloque VI - Financiero · Viernes" style="margin-bottom:16px;">
+
+      <label class="lbl">Tema de la clase</label>
+      <input type="text" id="cfg-tema" placeholder="ej. La Función Financiera y sus divisiones" style="margin-bottom:16px;">
+
+      <label class="lbl">Pregunta de reflexión (tal como la presentaste)</label>
+      <textarea id="cfg-pregunta" rows="3" placeholder="Escribe o pega aquí la pregunta exacta que le diste a los alumnos..."></textarea>
+    </div>
+
+    <div class="card">
+      <label class="lbl" style="margin-bottom:16px;">Rúbrica de evaluación — fija para todas las materias (100 puntos)</label>
+      <div class="rubric-grid">
+        <div class="rubric-item">
+          <div class="rubric-label" style="color:var(--cyan);">Extensión</div>
+          <div style="font-size:15px;color:var(--white);font-weight:600;margin-bottom:4px;">Extensión</div>
+          <div style="font-size:12px;color:var(--mgray);">Cumple con el mínimo de palabras solicitadas</div>
+          <div class="rubric-pts" style="margin-top:8px;">20 pts</div>
+        </div>
+        <div class="rubric-item">
+          <div class="rubric-label" style="color:var(--gold);">Comprensión</div>
+          <div style="font-size:15px;color:var(--white);font-weight:600;margin-bottom:4px;">Comprensión</div>
+          <div style="font-size:12px;color:var(--mgray);">Demuestra entendimiento del tema y responde la pregunta</div>
+          <div class="rubric-pts" style="margin-top:8px;">30 pts</div>
+        </div>
+        <div class="rubric-item">
+          <div class="rubric-label" style="color:var(--green);">Análisis crítico</div>
+          <div style="font-size:15px;color:var(--white);font-weight:600;margin-bottom:4px;">Análisis crítico</div>
+          <div style="font-size:12px;color:var(--mgray);">Contrasta ideas, aporta ejemplos propios, no solo repite teoría</div>
+          <div class="rubric-pts" style="margin-top:8px;">30 pts</div>
+        </div>
+        <div class="rubric-item">
+          <div class="rubric-label" style="color:#8855CC;">Claridad</div>
+          <div style="font-size:15px;color:var(--white);font-weight:600;margin-bottom:4px;">Claridad</div>
+          <div style="font-size:12px;color:var(--mgray);">Redacción coherente, sin errores graves, estructura lógica</div>
+          <div class="rubric-pts" style="margin-top:8px;">20 pts</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:#070C14;border-radius:8px;
+        display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--mgray);">Total fijo</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green);">100 pts</span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-cyan" onclick="goStep(2)">Siguiente → Cargar respuestas</button>
+    </div>
+  </div>
+
+  <!-- PANEL 2: Cargar CSV ─────────────────────────────────── -->
+  <div class="panel" id="panel2">
+    <h2>Cargar respuestas de Google Forms</h2>
+    <p class="sub">Exporta desde Google Forms → Respuestas → ⬇ Descargar CSV · luego cárgalo aquí</p>
+
+    <div class="card">
+      <label class="lbl">Cargar archivo CSV</label>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="csv-file" accept=".csv" onchange="handleCSV(this)">
+        <span class="dropzone-icon">📄</span>
+        <div class="dropzone-txt">Arrastra el CSV aquí o haz clic para seleccionar</div>
+        <div class="dropzone-sub">Archivo .csv exportado desde Google Forms</div>
+      </div>
+    </div>
+
+    <!-- Column selector — shown after CSV loads -->
+    <div id="col-selector" style="display:none">
+      <div class="card">
+        <label class="lbl">Selecciona las columnas correctas</label>
+        <p style="font-size:13px;color:var(--mgray);margin-bottom:16px;">
+          Google Forms agrega columnas extra (fecha, correo, etc.). Elige cuál tiene el nombre del alumno y cuál tiene la respuesta.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div>
+            <label class="lbl" style="color:var(--cyan);">Columna con el NOMBRE del alumno</label>
+            <select id="name-col" style="background:#070C14;border:1px solid var(--cyan);color:var(--white);
+              border-radius:8px;padding:10px 14px;font-family:'Crimson Pro',serif;font-size:14px;
+              outline:none;width:100%;"></select>
+          </div>
+          <div>
+            <label class="lbl" style="color:var(--gold);">Columna con la RESPUESTA de reflexión</label>
+            <select id="resp-col" style="background:#070C14;border:1px solid var(--gold);color:var(--white);
+              border-radius:8px;padding:10px 14px;font-family:'Crimson Pro',serif;font-size:14px;
+              outline:none;width:100%;"></select>
+          </div>
+        </div>
+        <button class="btn btn-cyan" onclick="applyColumns()" style="width:100%;">
+          ✓ Confirmar columnas y ver vista previa
+        </button>
+      </div>
+    </div>
+
+    <!-- Manual input -->
+    <div class="card">
+      <label class="lbl">Pegar respuestas desde Google Forms</label>
+      <p style="font-size:13px;color:var(--mgray);margin-bottom:12px;">
+        Copia todo el texto de la vista de respuestas de Google Forms y pégalo aquí. El evaluador detecta cada respuesta automáticamente.
+      </p>
+      <div style="background:#070C14;border:1px solid #1A3A6A44;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--mgray);">
+        <strong style="color:var(--cyan);">Formatos aceptados:</strong><br>
+        ① Texto copiado directo de Google Forms (párrafos separados por línea en blanco)<br>
+        ② Un nombre por línea seguido de la respuesta: <code style="background:#0A1220;padding:1px 5px;border-radius:3px;">García López | El flujo de efectivo...</code><br>
+        ③ Respuestas numeradas: <code style="background:#0A1220;padding:1px 5px;border-radius:3px;">1. El flujo de efectivo...</code>
+      </div>
+      <textarea id="manual-input" rows="10"
+        placeholder="Pega aquí todo el texto copiado de Google Forms...
+
+Los modelos de valuación tienen ciertas características...
+
+Usamos modelos de valuación no porque sean precisos...
+
+Seguimos utilizando estos modelos porque, aunque imperfectos..."></textarea>
+      <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
+        <button class="btn btn-cyan" onclick="parseManual()" style="flex:1;">
+          ✓ Procesar respuestas
+        </button>
+        <div style="font-size:12px;color:var(--mgray);font-style:italic;">
+          Si no hay nombres, se numeran automáticamente
+        </div>
+      </div>
+    </div>
+
+    <div id="preview-section" style="display:none">
+      <div class="card">
+        <label class="lbl">Vista previa — <span id="preview-count">0</span> respuestas detectadas</label>
+        <div class="csv-preview" id="csv-preview"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:16px;">
+        <button class="btn btn-ghost" onclick="goStep(1)">← Volver</button>
+        <button class="btn btn-cyan" onclick="goStep(3)">Siguiente → Evaluar con IA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: Evaluar ─────────────────────────────────────── -->
+  <div class="panel" id="panel3">
+    <h2>Evaluar con IA</h2>
+    <p class="sub">Claude evaluará cada respuesta con tu rúbrica. Tarda ~3 segundos por alumno.</p>
+
+    <div class="card" id="eval-summary">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div>
+          <div class="lbl">Pregunta</div>
+          <div style="font-size:14px;color:var(--lgray);" id="sum-pregunta"></div>
+        </div>
+        <div>
+          <div class="lbl">Alumnos</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cyan);" id="sum-count"></div>
+        </div>
+        <div>
+          <div class="lbl">Rúbrica</div>
+          <div style="font-size:13px;color:var(--lgray);" id="sum-rubrica"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:15px;color:var(--white);" id="eval-status">Listo para evaluar</div>
+          <div style="font-size:12px;color:var(--mgray);margin-top:2px;" id="eval-sub"></div>
+        </div>
+        <button class="btn btn-gold" id="eval-btn" onclick="startEval()">✨ Evaluar todos</button>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="eval-progress" style="width:0%"></div>
+      </div>
+      <div id="eval-log" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mgray);
+        max-height:160px;overflow-y:auto;margin-top:8px;"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Volver</button>
+      <button class="btn btn-green" id="goto-results" onclick="goStep(4)" disabled>Ver resultados →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 4: Resultados ─────────────────────────────────── -->
+  <div class="panel" id="panel4">
+    <h2>Resultados</h2>
+    <p class="sub" id="res-subtitle"></p>
+
+    <div class="stats" id="stats-bar"></div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="results-header">
+        <span>Alumno</span>
+        <span>Respuesta</span>
+        <span style="text-align:center">Pts</span>
+        <span style="text-align:center">Nivel</span>
+        <span>Comentario IA</span>
+      </div>
+      <div id="results-list"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="copyCSV()">📋 Copiar para Excel</button>
+      <button class="btn btn-green" onclick="downloadCSV()">⬇ Descargar CSV</button>
+      <button class="btn btn-gold" onclick="resetAll()">↺ Nueva evaluación</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let students = []; // [{name, response}]
+let results  = []; // [{name, response, score, level, comment}]
+let currentStep = 1;
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goStep(n){
+  if(n===3) fillEvalSummary();
+  if(n===4 && results.length===0) return;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`panel${n}`).classList.add('active');
+  const btn = document.getElementById(`step${n}-btn`);
+  btn.classList.add('active');
+  // Mark previous as done
+  for(let i=1;i<n;i++) document.getElementById(`step${i}-btn`).classList.add('done');
+  currentStep = n;
+  if(n===4) renderResults();
+}
+
+// ── Step 1: Config ────────────────────────────────────────────────────────────
+// Rúbrica fija — no requiere inicialización
+
+// Rúbrica fija — igual para todas las materias
+const RUBRICA_FIJA = [
+  {name:'Extensión',       pts:20, desc:'Cumple con el mínimo de palabras solicitadas'},
+  {name:'Comprensión',     pts:30, desc:'Demuestra entendimiento del tema y responde la pregunta'},
+  {name:'Análisis crítico',pts:30, desc:'Contrasta ideas, aporta ejemplos propios, no solo repite teoría'},
+  {name:'Claridad',        pts:20, desc:'Redacción coherente, sin errores graves, estructura lógica'},
+];
+function getRubric(){ return RUBRICA_FIJA; }
+
+// ── Step 2: CSV ───────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+dz.addEventListener('drop', e=>{
+  e.preventDefault(); dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) parseCSVFile(file);
+});
+
+function handleCSV(input){
+  if(input.files[0]) parseCSVFile(input.files[0]);
+}
+
+let csvRows = []; // raw parsed rows
+let csvHeaders = [];
+
+function parseCSVFile(file){
+  const reader = new FileReader();
+  reader.onload = e => loadCSVText(e.target.result);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function loadCSVText(text){
+  // Detect ZIP/XLSX (starts with PK magic bytes)
+  if(text.startsWith('PK') || text.charCodeAt(0) === 0x50 && text.charCodeAt(1) === 0x4B){
+    alert('⚠️ Este archivo es Excel (.xlsx), no CSV.\n\nPara obtener el CSV correcto:\n1. Abre el archivo en Excel\n2. Archivo → Guardar como → CSV UTF-8\n\nO desde Google Sheets:\nArchivo → Descargar → Valores separados por comas (.csv)');
+    document.getElementById('csv-file').value = '';
+    return;
+  }
+  // Detect if semicolon-delimited instead of comma
+  const firstLine = text.split('\n')[0];
+  const commas = (firstLine.match(/,/g)||[]).length;
+  const semis  = (firstLine.match(/;/g)||[]).length;
+  if(semis > commas){
+    // Replace semicolons with commas
+    text = text.replace(/;/g, ',');
+  }
+  const lines = text.split('\n').filter(l=>l.trim());
+  if(lines.length < 2){ alert('CSV vacío o inválido — verifica el archivo'); return; }
+  csvHeaders = parseCSVLine(lines[0]);
+  csvRows = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = parseCSVLine(lines[i]);
+    if(cols.some(c=>c.trim())) csvRows.push(cols);
+  }
+  // Populate column selectors
+  const nameEl = document.getElementById('name-col');
+  const respEl = document.getElementById('resp-col');
+  nameEl.innerHTML = ''; respEl.innerHTML = '';
+  csvHeaders.forEach((h,i)=>{
+    const isName = /nombre|name|alumno|student/i.test(h);
+    const isResp = /respuesta|response|reflexi|comment/i.test(h);
+    nameEl.innerHTML += `<option value="${i}" ${isName?'selected':''}>${i+1}. ${h.substring(0,40)}</option>`;
+    respEl.innerHTML += `<option value="${i}" ${isResp?'selected':''}>${i+1}. ${h.substring(0,40)}</option>`;
+  });
+  // Default resp to last column if none matched
+  if(!csvHeaders.some(h=>/respuesta|response|reflexi|comment/i.test(h))){
+    respEl.value = csvHeaders.length-1;
+  }
+  document.getElementById('col-selector').style.display = 'block';
+  document.getElementById('preview-section').style.display = 'none';
+}
+
+function applyColumns(){
+  const nameIdx = parseInt(document.getElementById('name-col').value);
+  const respIdx = parseInt(document.getElementById('resp-col').value);
+  if(nameIdx === respIdx){ alert('El nombre y la respuesta no pueden ser la misma columna.'); return; }
+  students = [];
+  for(const cols of csvRows){
+    const name = (cols[nameIdx]||'').trim();
+    const resp = (cols[respIdx]||'').trim();
+    if(name && resp) students.push({name, response:resp});
+  }
+  showPreview();
+}
+
+function parseCSVLine(line){
+  const result = [];
+  let cur = ''; let inQ = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(ch==='"'){ inQ=!inQ; }
+    else if(ch===','&&!inQ){ result.push(cur); cur=''; }
+    else cur+=ch;
+  }
+  result.push(cur);
+  return result.map(s=>s.replace(/^"|"$/g,'').trim());
+}
+
+function parseManual(){
+  const raw = document.getElementById('manual-input').value.trim();
+  if(!raw){ alert('Pega el texto primero.'); return; }
+  students = [];
+
+  // Format 1: pipe-separated "Nombre | Respuesta"
+  if(raw.includes('|')){
+    const lines = raw.split('\n').filter(l=>l.trim() && l.includes('|'));
+    for(const line of lines){
+      const parts = line.split('|');
+      students.push({ name: parts[0].trim(), response: parts.slice(1).join('|').trim() });
+    }
+  }
+  // Format 2: numbered "1. Respuesta" or "1) Respuesta"
+  else if(/^\s*\d+[.)]/m.test(raw)){
+    const blocks = raw.split(/\n\s*\d+[.)]/);
+    blocks.forEach((b,i)=>{
+      const txt = b.trim();
+      if(txt) students.push({ name:`Alumno ${i+1}`, response:txt });
+    });
+  }
+  // Format 3: Google Forms style — paragraphs separated by blank lines
+  // Skip lines that look like the question (long text before "X respuestas")
+  else {
+    // Remove header lines: question text + "N respuestas"
+    let text = raw;
+    text = text.replace(/^.{0,300}?\n\d+\s+respuestas?\n?/is, '').trim();
+
+    // Split by one or more blank lines
+    const blocks = text.split(/\n\s*\n+/).map(b=>b.trim()).filter(b=>b.length > 5);
+    blocks.forEach((b,i)=>{
+      // Check if block starts with a name (short first line before newline)
+      const lines = b.split('\n');
+      const firstLine = lines[0].trim();
+      const restLines = lines.slice(1).join(' ').trim();
+      // If first line is short (<40 chars) and rest is longer, treat as Name + Response
+      if(firstLine.length < 40 && restLines.length > 20){
+        students.push({ name: firstLine, response: restLines });
+      } else {
+        students.push({ name: `Alumno ${i+1}`, response: b.replace(/\n/g,' ').trim() });
+      }
+    });
+  }
+
+  if(students.length === 0){
+    alert('No se detectaron respuestas. Intenta separar cada respuesta con una línea en blanco.');
+    return;
+  }
+  showPreview();
+}
+
+function showPreview(){
+  if(students.length === 0){ alert('No se detectaron respuestas. Verifica el formato.'); return; }
+  document.getElementById('preview-count').textContent = students.length;
+  const preview = document.getElementById('csv-preview');
+  preview.innerHTML = students.map((s,i)=>`
+    <div class="csv-row-item">
+      <strong style="color:var(--cyan)">${s.name}</strong>
+      <span style="color:var(--mgray)"> → </span>
+      <span>${s.response.substring(0,80)}${s.response.length>80?'...':''}</span>
+    </div>`).join('');
+  document.getElementById('preview-section').style.display = 'block';
+  document.getElementById('counter-header').textContent = `${students.length} alumnos cargados`;
+}
+
+// ── Step 3: Eval ──────────────────────────────────────────────────────────────
+function fillEvalSummary(){
+  const pregunta = document.getElementById('cfg-pregunta').value;
+  document.getElementById('sum-pregunta').textContent = pregunta.substring(0,120)+(pregunta.length>120?'...':'');
+  document.getElementById('sum-count').textContent = students.length;
+  const rubric = getRubric();
+  document.getElementById('sum-rubrica').innerHTML = rubric.map(r=>`${r.name}: ${r.pts}pts`).join('<br>');
+}
+
+async function startEval(){
+  if(students.length === 0){ alert('Carga las respuestas primero.'); goStep(2); return; }
+
+  const btn = document.getElementById('eval-btn');
+  btn.disabled = true; btn.textContent = '⏳ Evaluando...';
+  document.getElementById('eval-status').textContent = 'Evaluando...';
+  results = [];
+
+  const pregunta  = document.getElementById('cfg-pregunta').value;
+  const materia   = document.getElementById('cfg-materia').value;
+  const tema      = document.getElementById('cfg-tema').value;
+  const rubric    = getRubric();
+  const log       = document.getElementById('eval-log');
+  const progress  = document.getElementById('eval-progress');
+
+  for(let i=0; i<students.length; i++){
+    const s = students[i];
+    const pct = Math.round((i/students.length)*100);
+    progress.style.width = pct+'%';
+    document.getElementById('eval-status').textContent = `Evaluando ${i+1} de ${students.length}...`;
+    document.getElementById('eval-sub').textContent = s.name;
+    log.innerHTML += `<div>→ ${s.name}...</div>`;
+    log.scrollTop = log.scrollHeight;
+
+    try {
+      const prompt = buildEvalPrompt(s, pregunta, materia, tema, rubric);
+      const res = await fetch("/api/claude",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-haiku-4-5-20251001", max_tokens:600,
+          messages:[{role:"user", content:prompt}]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || '';
+      const parsed = parseEvalResponse(text, s);
+      results.push(parsed);
+      log.innerHTML += `<div style="color:${scoreColor(parsed.score)}">  ✓ ${s.name}: ${parsed.score}/100</div>`;
+    } catch(e){
+      results.push({name:s.name, response:s.response, score:0, level:'Error', comment:'Error al evaluar'});
+      log.innerHTML += `<div style="color:var(--red)">  ✗ Error: ${s.name}</div>`;
+    }
+    log.scrollTop = log.scrollHeight;
+    // Small delay to avoid rate limiting
+    if(i < students.length-1) await new Promise(r=>setTimeout(r,800));
+  }
+
+  progress.style.width = '100%';
+  document.getElementById('eval-status').textContent = `✓ Evaluación completada — ${results.length} alumnos`;
+  document.getElementById('eval-sub').textContent = '';
+  btn.textContent = '✓ Completado';
+  document.getElementById('goto-results').disabled = false;
+}
+
+function buildEvalPrompt(student, pregunta, materia, tema, rubric){
+  const rubricText = rubric.map(r=>`- ${r.name} (${r.pts} pts): ${r.desc||''}`).join('\n');
+  return `Eres evaluador academico de la Universidad Humanitas.
+Materia: ${materia}. Tema: ${tema}.
+
+PREGUNTA DE REFLEXION:
+"${pregunta}"
+
+RESPUESTA DEL ALUMNO:
+"${student.response}"
+
+RUBRICA (100 puntos total):
+${rubricText}
+
+Evalua la respuesta criterio por criterio y asigna calificacion total.
+Si score>=90: menciona que hizo excelente.
+Si score 70-89: que estuvo bien y que le falto.
+Si score<70: explica que criterios no cumplio y como debio responder.
+
+Responde UNICAMENTE con este JSON exacto, sin texto antes ni despues:
+{"score":85,"level":"Muy Bien","comment":"Comentario aqui."}
+
+level debe ser exactamente uno de: Excelente, Muy Bien, Suficiente, En Riesgo.`;
+}
+
+function parseEvalResponse(text, student){
+  if(!text) return errorResult(student);
+  const t = text.trim();
+  // Method 1: direct JSON parse
+  try { return buildResult(JSON.parse(t), student); } catch(e){}
+  // Method 2: extract JSON object (handles text before/after)
+  try {
+    const m = t.match(/\{[^{}]*"score"[^{}]*\}/s);
+    if(m) return buildResult(JSON.parse(m[0]), student);
+  } catch(e){}
+  // Method 3: extract fields individually
+  const sM = t.match(/"score"\s*:\s*(\d{1,3})/);
+  const lM = t.match(/"level"\s*:\s*"([^"]{3,20})"/);
+  const cM = t.match(/"comment"\s*:\s*"([^"]{5,})"/);
+  if(sM){
+    const score = Math.min(100, parseInt(sM[1]));
+    return {
+      name:student.name, response:student.response, score,
+      level: lM ? lM[1] : levelFromScore(score),
+      comment: cM ? cM[1] : ''
+    };
+  }
+  // Method 4: look for a number that looks like a score
+  const nums = [...t.matchAll(/(\d{2,3})/g)].map(m=>parseInt(m[1])).filter(n=>n<=100&&n>=0);
+  if(nums.length) {
+    const score = nums[0];
+    return {name:student.name, response:student.response, score, level:levelFromScore(score), comment:t.substring(0,120)};
+  }
+  return errorResult(student);
+}
+
+function buildResult(obj, student){
+  const score = Math.min(100, Math.max(0, parseInt(obj.score)||0));
+  return { name:student.name, response:student.response, score, level:obj.level||levelFromScore(score), comment:obj.comment||'' };
+}
+
+function errorResult(student){
+  return { name:student.name, response:student.response, score:0, level:'Error', comment:'No se pudo evaluar — intenta de nuevo' };
+}
+
+function levelFromScore(s){ return s>=90?'Excelente':s>=80?'Muy Bien':s>=70?'Suficiente':'En Riesgo'; }
+function scoreColor(s){ return s>=90?'var(--green)':s>=80?'var(--cyan)':s>=70?'var(--gold)':'var(--red)'; }
+function scoreClass(s){ return s>=90?'score-ex':s>=80?'score-mb':s>=70?'score-sf':'score-er'; }
+
+// ── Step 4: Results ───────────────────────────────────────────────────────────
+function renderResults(){
+  if(results.length===0) return;
+  const tema = document.getElementById('cfg-tema').value;
+  const materia = document.getElementById('cfg-materia').value;
+  document.getElementById('res-subtitle').textContent = `${materia} · ${tema} · ${results.length} alumnos evaluados`;
+
+  // Stats
+  const avg = Math.round(results.reduce((a,r)=>a+r.score,0)/results.length);
+  const ex  = results.filter(r=>r.score>=90).length;
+  const mb  = results.filter(r=>r.score>=80&&r.score<90).length;
+  const sf  = results.filter(r=>r.score>=70&&r.score<80).length;
+  const er  = results.filter(r=>r.score<70).length;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="stat-val" style="color:var(--cyan)">${avg}</div><div class="stat-lbl">Promedio</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${ex}</div><div class="stat-lbl">Excelente</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--gold)">${sf}</div><div class="stat-lbl">Suficiente</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--red)">${er}</div><div class="stat-lbl">En Riesgo</div></div>
+  `;
+
+  // Sort by score desc
+  const sorted = [...results].sort((a,b)=>b.score-a.score);
+  document.getElementById('results-list').innerHTML = sorted.map(r=>`
+    <div class="result-row">
+      <div class="result-name">${r.name}</div>
+      <div class="result-resp">${r.response}</div>
+      <div class="result-score ${scoreClass(r.score)}">${r.score}</div>
+      <div style="text-align:center">
+        <span class="tag" style="color:${scoreColor(r.score)};border-color:${scoreColor(r.score)}44;font-size:9px;">
+          ${r.level}
+        </span>
+      </div>
+      <div class="result-comment" style="${r.score<70?'color:#E87060;border-left:2px solid #E85040;padding-left:8px;':''}">
+        ${r.score<70?'⚠️ ':''}${r.comment}
+      </div>
+    </div>`).join('');
+}
+
+function copyCSV(){
+  const lines = ['Nombre,Respuesta,Calificación,Nivel,Comentario'];
+  results.forEach(r=>lines.push(
+    `"${r.name}","${r.response.replace(/"/g,'""')}",${r.score},"${r.level}","${r.comment.replace(/"/g,'""')}"`
+  ));
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Copiado al portapapeles. Pega en Excel con Ctrl+V.'));
+}
+
+function downloadCSV(){
+  const materia = document.getElementById('cfg-materia').value || 'evaluacion';
+  const tema = document.getElementById('cfg-tema').value || 'reflexion';
+  const lines = ['Nombre,Respuesta,Calificacion,Nivel,Comentario'];
+  results.forEach(r=>lines.push(
+    `"${r.name}","${r.response.replace(/"/g,'""')}",${r.score},"${r.level}","${r.comment.replace(/"/g,'""')}"`
+  ));
+  const blob = new Blob(['\uFEFF'+lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `reflexion-${materia.replace(/[^a-z0-9]/gi,'-')}.csv`;
+  a.click();
+}
+
+function resetAll(){
+  if(!confirm('¿Iniciar una nueva evaluación? Se borrarán los resultados actuales.')) return;
+  students=[]; results=[]; csvRows=[]; csvHeaders=[];
+  document.getElementById('csv-file').value='';
+  document.getElementById('manual-input').value='';
+  document.getElementById('preview-section').style.display='none';
+  document.getElementById('col-selector').style.display='none';
+  document.getElementById('eval-log').innerHTML='';
+  document.getElementById('eval-progress').style.width='0%';
+  document.getElementById('eval-btn').disabled=false;
+  document.getElementById('eval-btn').textContent='✨ Evaluar todos';
+  document.getElementById('goto-results').disabled=true;
+  document.getElementById('counter-header').textContent='';
+  goStep(1);
+}
+</script>
+</body>
+</html>

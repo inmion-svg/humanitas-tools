@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herramientas Docentes · Humanitas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Crimson Pro',serif;background:#07090E;color:#F0F4FC;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%,#1A3A6A20,transparent 60%);}
+.header{text-align:center;margin-bottom:48px;}
+.uni{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:4px;text-transform:uppercase;
+  color:#6A7A8A;margin-bottom:12px;}
+h1{font-family:'Bebas Neue',sans-serif;font-size:48px;color:#E8A830;letter-spacing:1px;margin-bottom:8px;}
+.sub{font-size:16px;color:#6A7A8A;font-style:italic;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;width:100%;position:relative;z-index:1;}
+.card{background:#0C1422;border:1px solid #1A3A6A55;border-radius:16px;padding:32px 28px;
+  text-decoration:none;color:inherit;transition:all .25s;display:flex;flex-direction:column;gap:12px;}
+.card:hover{border-color:var(--accent);background:#101A2C;transform:translateY(-4px);}
+.icon{font-size:36px;margin-bottom:4px;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:.5px;}
+.card-desc{font-size:14px;color:#6A7A8A;line-height:1.6;}
+.card-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;border:1px solid var(--accent);color:var(--accent);
+  background:var(--accent-bg);width:fit-content;margin-top:auto;}
+.footer{margin-top:40px;font-family:'DM Mono',monospace;font-size:11px;color:#2A3A4A;
+  letter-spacing:2px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="uni">Universidad Humanitas · Aguilar King Inmion</div>
+  <h1>Herramientas Docentes</h1>
+  <div class="sub">Suite de productividad para el trimestre Abril–Junio 2026</div>
+</div>
+
+<div class="grid">
+  <a href="dashboard-contenidos-T2.html" class="card" style="--accent:#00C8E0;--accent-bg:#00C8E010;">
+    <div class="icon">📋</div>
+    <div class="card-title">Dashboard de Contenidos</div>
+    <div class="card-desc">Control de clases, generación de presentaciones, ensayos, briefs, reflexiones y guías de estudio con IA.</div>
+    <div class="card-tag">3 grupos · 11 clases</div>
+  </a>
+
+  <a href="evaluador-reflexiones.html" class="card" style="--accent:#28C878;--accent-bg:#28C87810;">
+    <div class="icon">📖</div>
+    <div class="card-title">Evaluador de Reflexiones</div>
+    <div class="card-desc">Pega las respuestas de Google Forms y Claude evalúa y califica a todos los alumnos de una sola vez.</div>
+    <div class="card-tag">Rúbrica fija · 4 criterios</div>
+  </a>
+
+  <a href="generador-examenes.html" class="card" style="--accent:#E8A830;--accent-bg:#E8A83010;">
+    <div class="icon">📝</div>
+    <div class="card-title">Generador de Exámenes</div>
+    <div class="card-desc">Genera 20 preguntas de opción múltiple basadas en la guía de estudio, listas para copiar a Google Forms.</div>
+    <div class="card-tag">Básico · Aplicación · Análisis</div>
+  </a>
+</div>
+
+<div class="footer">Trimestre T2 · 2026 · Powered by Claude</div>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Exámenes · Humanitas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090E;--navy:#0C1422;--navy2:#101A2C;--blue:#1A3A6A;
+  --cyan:#00C8E0;--gold:#E8A830;--green:#28C878;--red:#E85040;
+  --purp:#8855CC;--white:#F0F4FC;--lgray:#C0CCD8;--mgray:#6A7A8A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Crimson Pro',serif;background:var(--bg);color:var(--white);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 40% at 90% 10%,#E8A83010,transparent 55%),
+             radial-gradient(ellipse 40% 40% at 0% 90%,#8855CC08,transparent 55%);}
+
+header{background:var(--navy);border-bottom:1px solid #1A3A6A44;padding:0 32px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);letter-spacing:1px;}
+.logo span{color:var(--mgray);font-size:12px;font-family:'DM Mono',monospace;margin-left:12px;letter-spacing:2px;}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;}
+
+.steps{display:flex;gap:0;margin-bottom:36px;border-bottom:1px solid #1A2535;}
+.step{display:flex;align-items:center;gap:8px;padding:12px 20px;font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mgray);
+  border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s;}
+.step.active{color:var(--gold);border-color:var(--gold);}
+.step.done{color:var(--green);border-color:var(--green);}
+.step-num{width:22px;height:22px;border-radius:50%;border:1px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+.panel{display:none;animation:fadeIn .3s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);margin-bottom:6px;}
+.sub{font-size:14px;color:var(--mgray);margin-bottom:24px;font-style:italic;}
+
+.card{background:var(--navy);border:1px solid #1A3A6A44;border-radius:12px;padding:22px;margin-bottom:16px;}
+.lbl{display:block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--mgray);margin-bottom:8px;}
+
+textarea,input[type=text],select{width:100%;background:#070C14;border:1px solid #1A3A6A;
+  color:var(--white);border-radius:8px;padding:12px 16px;font-family:'Crimson Pro',serif;
+  font-size:15px;outline:none;transition:border-color .2s;resize:vertical;}
+textarea:focus,input[type=text]:focus,select:focus{border-color:var(--gold);}
+select option{background:var(--navy);}
+
+/* Difficulty selector */
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;}
+.diff-card{background:#070C14;border:1px solid #1A3A6A44;border-radius:10px;padding:16px;text-align:center;}
+.diff-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.diff-num{font-family:'Bebas Neue',sans-serif;font-size:36px;margin-bottom:6px;}
+.diff-input{width:70px;font-size:18px;padding:8px;text-align:center;border-radius:6px;background:#0A1220;
+  border:1px solid #1A3A6A;color:var(--white);font-family:'Bebas Neue',sans-serif;outline:none;}
+
+/* Total indicator */
+.total-indicator{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;background:#070C14;border-radius:8px;margin-top:8px;}
+
+/* Buttons */
+.btn{border:none;border-radius:8px;padding:11px 22px;cursor:pointer;font-family:'DM Mono',monospace;
+  font-size:12px;letter-spacing:1px;text-transform:uppercase;transition:all .2s;font-weight:500;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#A87820);color:#070C14;}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),#007A8A);color:#070C14;}
+.btn-green{background:linear-gradient(135deg,var(--green),#0A6030);color:#070C14;}
+.btn-purp{background:linear-gradient(135deg,var(--purp),#4A2A8A);color:var(--white);}
+.btn-ghost{background:transparent;border:1px solid #1A3A6A;color:var(--mgray);}
+.btn:hover{opacity:.85;transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* Progress */
+.progress-bar{height:4px;background:#1A2535;border-radius:4px;margin:12px 0;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));
+  border-radius:4px;transition:width .5s ease;}
+
+/* Question cards */
+.q-card{background:var(--navy2);border:1px solid #1A3A6A33;border-radius:10px;
+  padding:18px;margin-bottom:12px;position:relative;}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.q-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);width:32px;}
+.q-diff{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  padding:2px 8px;border-radius:20px;border:1px solid;}
+.q-text{font-size:16px;color:var(--white);line-height:1.5;margin-bottom:12px;font-weight:600;}
+.q-options{display:grid;gap:6px;}
+.q-option{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:6px;
+  font-size:14px;color:var(--lgray);transition:background .15s;}
+.q-option.correct{background:#0A3020;color:var(--green);border:1px solid #28C87833;}
+.q-option-letter{font-family:'Bebas Neue',sans-serif;font-size:16px;min-width:18px;}
+.q-feedback{margin-top:10px;padding:10px 12px;background:#070C14;border-left:3px solid var(--gold);
+  border-radius:0 6px 6px 0;font-size:13px;color:var(--mgray);font-style:italic;line-height:1.5;}
+
+/* Answer key */
+.answer-key{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.ak-item{background:#070C14;border:1px solid #1A3A6A44;border-radius:6px;padding:10px;text-align:center;}
+.ak-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--mgray);margin-bottom:4px;}
+.ak-ans{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
+
+/* Forms format */
+.forms-output{background:#070C14;border:1px solid #1A3A6A;border-radius:8px;
+  padding:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--lgray);
+  white-space:pre-wrap;max-height:400px;overflow-y:auto;line-height:1.8;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat{background:var(--navy);border-radius:10px;padding:16px;text-align:center;border:1px solid #1A3A6A44;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:2px;}
+.stat-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mgray);}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:20px;}
+.tab{padding:8px 18px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid #1A3A6A;
+  color:var(--mgray);background:transparent;transition:all .2s;}
+.tab.active{background:var(--gold);color:#070C14;border-color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Generador de Exámenes <span>Universidad Humanitas</span></div>
+  <div id="header-info" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--mgray);letter-spacing:1px;"></div>
+</header>
+
+<main>
+  <div class="steps">
+    <div class="step active" id="s1-btn" onclick="goStep(1)"><span class="step-num">1</span>Configurar</div>
+    <div class="step" id="s2-btn" onclick="goStep(2)"><span class="step-num">2</span>Guía de estudio</div>
+    <div class="step" id="s3-btn" onclick="goStep(3)"><span class="step-num">3</span>Generar</div>
+    <div class="step" id="s4-btn" onclick="goStep(4)"><span class="step-num">4</span>Examen</div>
+  </div>
+
+  <!-- PANEL 1 ─────────────────────────────────────────── -->
+  <div class="panel active" id="panel1">
+    <h2>Configurar examen</h2>
+    <p class="sub">Define los parámetros del parcial antes de generarlo</p>
+
+    <div class="card">
+      <label class="lbl">Materia</label>
+      <select id="p1-materia" style="margin-bottom:16px;">
+        <option value="Bloque VI - Financiero · Viernes">Bloque VI - Financiero · Viernes 18:00-21:00 · Ejecutivo</option>
+        <option value="Bloque VI - Financiero · Sábado">Bloque VI - Financiero · Sábado 11:30-14:30 · Ejecutivo</option>
+        <option value="Fundamentos de Negocios Internacionales · Lunes">Fundamentos de Negocios Internacionales · Lunes 14:00-16:00 · Escolarizado</option>
+      </select>
+
+      <label class="lbl">Parcial</label>
+      <select id="p1-parcial" style="margin-bottom:16px;">
+        <option value="Parcial 1">Parcial 1 — Clases 1 a 4</option>
+        <option value="Parcial 2 / Examen Final">Parcial 2 / Examen Final — Clases 5 a 10</option>
+      </select>
+
+
+    </div>
+
+    <div class="card">
+      <label class="lbl" style="margin-bottom:16px;">Distribución de preguntas por nivel de dificultad</label>
+      <div class="diff-grid">
+        <div class="diff-card">
+          <div class="diff-label" style="color:#28C878;">Básico</div>
+          <div class="diff-num" style="color:#28C878;" id="basic-display">8</div>
+          <input type="range" id="basic-n" min="0" max="20" value="8"
+            oninput="updateDiff()" style="width:100%;accent-color:#28C878;">
+          <div style="font-size:12px;color:var(--mgray);margin-top:4px;">Definición y reconocimiento</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--gold);">Aplicación</div>
+          <div class="diff-num" style="color:var(--gold);" id="app-display">8</div>
+          <input type="range" id="app-n" min="0" max="20" value="8"
+            oninput="updateDiff()" style="width:100%;accent-color:#E8A830;">
+          <div style="font-size:12px;color:var(--mgray);margin-top:4px;">Usar el concepto en contexto</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--purp);">Análisis</div>
+          <div class="diff-num" style="color:var(--purp);" id="anal-display">4</div>
+          <input type="range" id="anal-n" min="0" max="20" value="4"
+            oninput="updateDiff()" style="width:100%;accent-color:#8855CC;">
+          <div style="font-size:12px;color:var(--mgray);margin-top:4px;">Evaluar y razonar</div>
+        </div>
+      </div>
+      <div class="total-indicator">
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--mgray);">Total de preguntas</span>
+        <span id="total-q" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);">20</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="lbl" style="margin-bottom:16px;">Distribución por tipo de pregunta</label>
+      <div class="diff-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--cyan);">Opción múltiple</div>
+          <div class="diff-num" style="color:var(--cyan);" id="mc-display">15</div>
+          <input type="range" id="mc-n" min="0" max="20" value="15"
+            oninput="updateTypes()" style="width:100%;accent-color:#00C8E0;">
+          <div style="font-size:11px;color:var(--mgray);margin-top:4px;">A, B, C, D — una respuesta correcta</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--green);">Verdadero / Falso</div>
+          <div class="diff-num" style="color:var(--green);" id="tf-display">3</div>
+          <input type="range" id="tf-n" min="0" max="20" value="3"
+            oninput="updateTypes()" style="width:100%;accent-color:#28C878;">
+          <div style="font-size:11px;color:var(--mgray);margin-top:4px;">Afirmación correcta o incorrecta</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--gold);">Caso práctico</div>
+          <div class="diff-num" style="color:var(--gold);" id="case-display">1</div>
+          <input type="range" id="case-n" min="0" max="5" value="1"
+            oninput="updateTypes()" style="width:100%;accent-color:#E8A830;">
+          <div style="font-size:11px;color:var(--mgray);margin-top:4px;">Caso ficticio o real + opción múltiple</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-label" style="color:var(--purp);">Pregunta abierta</div>
+          <div class="diff-num" style="color:var(--purp);" id="open-display">1</div>
+          <input type="range" id="open-n" min="0" max="5" value="1"
+            oninput="updateTypes()" style="width:100%;accent-color:#8855CC;">
+          <div style="font-size:11px;color:var(--mgray);margin-top:4px;">Respuesta de desarrollo breve</div>
+        </div>
+      </div>
+      <div class="total-indicator" style="margin-top:8px;">
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--mgray);">Total por tipo</span>
+        <span id="total-types" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);">20</span>
+      </div>
+      <div id="types-warning" style="display:none;margin-top:8px;padding:8px 12px;background:#E8504015;
+        border:1px solid #E8504044;border-radius:6px;font-size:12px;color:var(--red);font-family:'DM Mono',monospace;">
+        ⚠️ El total por tipo debe coincidir con el total por dificultad
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-gold" onclick="goStep(2)">Siguiente → Pegar guía de estudio</button>
+    </div>
+  </div>
+
+  <!-- PANEL 2 ─────────────────────────────────────────── -->
+  <div class="panel" id="panel2">
+    <h2>Guía de estudio</h2>
+    <p class="sub">Pega aquí el contenido de la guía que generaste en el dashboard — las preguntas se basarán en ella</p>
+
+    <div class="card">
+      <label class="lbl">Contenido de la guía de estudio</label>
+      <textarea id="guia-content" rows="16"
+        placeholder="Pega aquí el contenido completo de la guía de estudio que generaste en el dashboard...
+
+La guía puede incluir:
+• Temas cubiertos
+• Conceptos clave
+• Preguntas de autoevaluación
+• Casos prácticos
+• Lo más probable que pregunten
+
+Mientras más completa sea la guía, más precisas serán las preguntas del examen."></textarea>
+      <div style="margin-top:10px;padding:10px 14px;background:#070C14;border-radius:8px;
+        font-size:13px;color:var(--mgray);font-style:italic;">
+        💡 Si la guía es extensa, Claude la leerá completa y diseñará preguntas que cubran todos los temas proporcionalmente.
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Volver</button>
+      <button class="btn btn-gold" onclick="goStep(3)">Siguiente → Generar examen</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3 ─────────────────────────────────────────── -->
+  <div class="panel" id="panel3">
+    <h2>Generando examen</h2>
+    <p class="sub" id="p3-sub">Claude está creando las preguntas basadas en la guía de estudio...</p>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;color:var(--white);" id="gen-status">Listo para generar</div>
+          <div style="font-size:12px;color:var(--mgray);margin-top:3px;" id="gen-sub">
+            Revisa los parámetros y presiona generar
+          </div>
+        </div>
+        <button class="btn btn-gold" id="gen-btn" onclick="generateExam()">✨ Generar examen</button>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="gen-progress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Config summary -->
+    <div class="card" id="gen-summary">
+      <label class="lbl">Parámetros del examen</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:4px;">
+        <div>
+          <div style="font-size:12px;color:var(--mgray);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Materia</div>
+          <div style="font-size:15px;" id="sum-materia"></div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--mgray);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Parcial</div>
+          <div style="font-size:15px;" id="sum-parcial"></div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--mgray);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Distribución</div>
+          <div style="font-size:15px;" id="sum-dist"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Volver</button>
+      <button class="btn btn-green" id="goto-exam" onclick="goStep(4)" disabled>Ver examen →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 4 ─────────────────────────────────────────── -->
+  <div class="panel" id="panel4">
+    <h2 id="p4-title">Examen generado</h2>
+    <p class="sub" id="p4-sub"></p>
+
+    <!-- Stats -->
+    <div class="stats-row" id="exam-stats"></div>
+
+    <!-- View tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showView('preguntas',this)">Preguntas con clave</button>
+      <button class="tab" onclick="showView('clave',this)">Clave rápida</button>
+      <button class="tab" onclick="showView('forms',this)">Formato Google Forms</button>
+    </div>
+
+    <!-- Preguntas view -->
+    <div id="view-preguntas">
+      <div id="questions-list"></div>
+    </div>
+
+    <!-- Clave view -->
+    <div id="view-clave" style="display:none;">
+      <div class="card">
+        <label class="lbl" style="margin-bottom:16px;">Clave de respuestas correctas</label>
+        <div class="answer-key" id="answer-key-grid"></div>
+      </div>
+    </div>
+
+    <!-- Google Forms view -->
+    <div id="view-forms" style="display:none;">
+      <div class="card">
+        <label class="lbl" style="margin-bottom:8px;">Listo para copiar a Google Forms</label>
+        <div style="font-size:13px;color:var(--mgray);margin-bottom:12px;">
+          Copia este texto → abre Google Forms → crea preguntas de opción múltiple → pega cada bloque
+        </div>
+        <div class="forms-output" id="forms-output"></div>
+        <button class="btn btn-cyan" onclick="copyForms()" style="margin-top:12px;width:100%;">
+          📋 Copiar todo para Google Forms
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="regenerate()">↺ Regenerar</button>
+      <button class="btn btn-gold" onclick="resetAll()">Nuevo examen</button>
+    </div>
+  </div>
+</main>
+
+<script>
+let questions = [];
+let currentStep = 1;
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goStep(n){
+  if(n===3) fillSummary();
+  if(n===4 && questions.length===0) return;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
+  document.getElementById(`panel${n}`).classList.add('active');
+  document.getElementById(`s${n}-btn`).classList.add('active');
+  for(let i=1;i<n;i++) document.getElementById(`s${i}-btn`).classList.add('done');
+  currentStep = n;
+  if(n===4) renderExam();
+}
+
+// ── Step 1 ────────────────────────────────────────────────────────────────────
+function updateTypes(){
+  const mc   = parseInt(document.getElementById('mc-n').value);
+  const tf   = parseInt(document.getElementById('tf-n').value);
+  const cs   = parseInt(document.getElementById('case-n').value);
+  const op   = parseInt(document.getElementById('open-n').value);
+  document.getElementById('mc-display').textContent   = mc;
+  document.getElementById('tf-display').textContent   = tf;
+  document.getElementById('case-display').textContent = cs;
+  document.getElementById('open-display').textContent = op;
+  const total = mc+tf+cs+op;
+  const el = document.getElementById('total-types');
+  el.textContent = total;
+  const totalQ = parseInt(document.getElementById('total-q').textContent)||20;
+  const match = total === totalQ;
+  el.style.color = match ? 'var(--green)' : 'var(--red)';
+  document.getElementById('types-warning').style.display = match ? 'none' : 'block';
+}
+
+function updateDiff(){
+  const b = parseInt(document.getElementById('basic-n').value);
+  const a = parseInt(document.getElementById('app-n').value);
+  const an = parseInt(document.getElementById('anal-n').value);
+  document.getElementById('basic-display').textContent = b;
+  document.getElementById('app-display').textContent = a;
+  document.getElementById('anal-display').textContent = an;
+  const total = b+a+an;
+  const el = document.getElementById('total-q');
+  el.textContent = total;
+  el.style.color = total===20 ? 'var(--green)' : (total>20 ? 'var(--red)' : 'var(--gold)');
+}
+
+// ── Step 3 ────────────────────────────────────────────────────────────────────
+function fillSummary(){
+  document.getElementById('sum-materia').textContent = document.getElementById('p1-materia').value || 'Sin especificar';
+  document.getElementById('sum-parcial').textContent = document.getElementById('p1-parcial').value;
+  const b  = document.getElementById('basic-n').value;
+  const a  = document.getElementById('app-n').value;
+  const an = document.getElementById('anal-n').value;
+  const mc   = document.getElementById('mc-n').value;
+  const tf   = document.getElementById('tf-n').value;
+  const cs   = document.getElementById('case-n').value;
+  const op   = document.getElementById('open-n').value;
+  document.getElementById('sum-dist').textContent =
+    `${b} Básico · ${a} Aplicación · ${an} Análisis | ${mc} OM · ${tf} VF · ${cs} Caso · ${op} Abierta`;
+  document.getElementById('p4-title').textContent = document.getElementById('p1-parcial').value;
+}
+
+async function generateExam(){
+  const guia = document.getElementById('guia-content').value.trim();
+  if(!guia){ alert('Pega el contenido de la guía de estudio primero.'); goStep(2); return; }
+
+  const materia = document.getElementById('p1-materia').value || 'Materia';
+  const parcial = document.getElementById('p1-parcial').value;
+  
+  const b  = parseInt(document.getElementById('basic-n').value);
+  const a  = parseInt(document.getElementById('app-n').value);
+  const an = parseInt(document.getElementById('anal-n').value);
+  const mc   = parseInt(document.getElementById('mc-n').value);
+  const tf   = parseInt(document.getElementById('tf-n').value);
+  const cs   = parseInt(document.getElementById('case-n').value);
+  const op   = parseInt(document.getElementById('open-n').value);
+  const total = b+a+an;
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+  document.getElementById('gen-status').textContent = 'Generando preguntas...';
+  document.getElementById('gen-sub').textContent = `${total} preguntas · 4 opciones · basadas en la guía`;
+  document.getElementById('gen-progress').style.width = '30%';
+
+    const tiposDist = [];
+  if(mc>0)   tiposDist.push(`${mc} preguntas de OPCION MULTIPLE (4 opciones A,B,C,D, una correcta)`);
+  if(tf>0)   tiposDist.push(`${tf} preguntas de VERDADERO/FALSO (afirmacion que puede ser V o F)`);
+  if(cs>0)   tiposDist.push(`${cs} pregunta(s) de CASO PRACTICO (caso real o ficticio + opcion multiple)`);
+  if(op>0)   tiposDist.push(`${op} pregunta(s) ABIERTA (respuesta de desarrollo breve, 2-3 lineas)`);
+
+  const prompt = `Eres generador de examenes academicos para la Universidad Humanitas.
+Materia: "${materia}" | Parcial: ${parcial}
+
+GUIA DE ESTUDIO (base obligatoria):
+${guia}
+
+Genera exactamente ${total} preguntas basadas UNICAMENTE en el contenido de la guia.
+
+DISTRIBUCION POR NIVEL:
+- ${b} preguntas BASICO (definicion, reconocimiento, memoria)
+- ${a} preguntas APLICACION (usar el concepto en un caso o contexto)
+- ${an} preguntas ANALISIS (evaluar, comparar, razonar)
+
+DISTRIBUCION POR TIPO:
+${tiposDist.join('\n')}
+
+REGLAS:
+- Cubre todos los temas de la guia proporcionalmente
+- Distractores plausibles en opcion multiple
+- El caso practico debe describir una empresa mexicana con datos concretos
+- La pregunta abierta no tiene opciones, solo el enunciado
+- Para V/F usa opciones A=Verdadero B=Falso
+
+Responde SOLO con este JSON, sin texto adicional:
+{"preguntas":[{"num":1,"nivel":"Basico","tipo":"opcion_multiple","pregunta":"texto","opciones":{"A":"op1","B":"op2","C":"op3","D":"op4"},"correcta":"A","retroalimentacion":"explicacion"},{"num":2,"nivel":"Basico","tipo":"verdadero_falso","pregunta":"afirmacion","opciones":{"A":"Verdadero","B":"Falso"},"correcta":"A","retroalimentacion":"explicacion"},{"num":3,"nivel":"Aplicacion","tipo":"caso_practico","pregunta":"Contexto del caso...\nPregunta sobre el caso","opciones":{"A":"op1","B":"op2","C":"op3","D":"op4"},"correcta":"B","retroalimentacion":"explicacion"},{"num":4,"nivel":"Analisis","tipo":"abierta","pregunta":"Pregunta abierta de desarrollo","opciones":{},"correcta":"Abierta","retroalimentacion":"Elementos que debe incluir la respuesta correcta"}]}
+
+Genera las ${total} preguntas siguiendo exactamente la distribucion indicada.`;
+
+  try {
+    document.getElementById('gen-progress').style.width = '60%';
+    const res = await fetch("/api/claude",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-haiku-4-5-20251001", max_tokens:1000,
+        messages:[{role:"user", content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    document.getElementById('gen-progress').style.width = '90%';
+
+    // Parse JSON
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Respuesta inválida');
+    const parsed = JSON.parse(jsonMatch[0]);
+    questions = parsed.preguntas || [];
+
+    if(questions.length === 0) throw new Error('No se generaron preguntas');
+
+    document.getElementById('gen-progress').style.width = '100%';
+    document.getElementById('gen-status').textContent = `✓ ${questions.length} preguntas generadas`;
+    document.getElementById('gen-sub').textContent = 'Listo para revisar';
+    btn.textContent = '✓ Generado';
+    document.getElementById('goto-exam').disabled = false;
+    document.getElementById('header-info').textContent = `${questions.length} preguntas · ${materia}`;
+
+  } catch(e) {
+    document.getElementById('gen-status').textContent = '✗ Error al generar';
+    document.getElementById('gen-sub').textContent = e.message + ' · Intenta de nuevo';
+    btn.disabled = false; btn.textContent = '↺ Reintentar';
+    document.getElementById('gen-progress').style.width = '0%';
+  }
+}
+
+// ── Step 4 ────────────────────────────────────────────────────────────────────
+function renderExam(){
+  if(questions.length===0) return;
+  const materia = document.getElementById('p1-materia').value;
+  const parcial = document.getElementById('p1-parcial').value;
+  document.getElementById('p4-sub').textContent = `${materia} · ${parcial} · ${questions.length} preguntas`;
+
+  // Stats
+  const basic = questions.filter(q=>q.nivel==='Básico').length;
+  const app   = questions.filter(q=>q.nivel==='Aplicación').length;
+  const anal  = questions.filter(q=>q.nivel==='Análisis').length;
+  document.getElementById('exam-stats').innerHTML = `
+    <div class="stat"><div class="stat-val" style="color:var(--gold)">${questions.length}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${basic}</div><div class="stat-lbl">Básico</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--gold)">${app}</div><div class="stat-lbl">Aplicación</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--purp)">${anal}</div><div class="stat-lbl">Análisis</div></div>
+  `;
+
+  // Questions
+  const levelColor = n => n==='Básico'||n==='Basico'?'var(--green)':n==='Aplicación'||n==='Aplicacion'?'var(--gold)':'var(--purp)';
+  const typeLabel = t => ({'opcion_multiple':'OM','verdadero_falso':'V/F','caso_practico':'Caso','abierta':'Abierta'})[t]||'OM';
+  const typeColor = t => ({'opcion_multiple':'var(--cyan)','verdadero_falso':'var(--green)','caso_practico':'var(--gold)','abierta':'var(--purp)'})[t]||'var(--cyan)';
+  document.getElementById('questions-list').innerHTML = questions.map((q,i)=>`
+    <div class="q-card">
+      <div class="q-header">
+        <div class="q-num">${i+1}</div>
+        <span class="q-diff" style="color:${levelColor(q.nivel)};border-color:${levelColor(q.nivel)}44">
+          ${q.nivel}
+        </span>
+        <span class="q-diff" style="color:${typeColor(q.tipo||'opcion_multiple')};border-color:${typeColor(q.tipo||'opcion_multiple')}44;margin-left:4px;">
+          ${typeLabel(q.tipo||'opcion_multiple')}
+        </span>
+      </div>
+      <div class="q-text">${q.pregunta}</div>
+      <div class="q-options">
+        ${q.tipo==='abierta'
+          ? '<div style="padding:12px;background:#070C14;border-radius:6px;color:var(--mgray);font-size:13px;font-style:italic;">Respuesta de desarrollo — el alumno escribe su respuesta</div>'
+          : q.tipo==='verdadero_falso'
+            ? ['A','B'].map(l=>`
+              <div class="q-option ${q.correcta===l?'correct':''}">
+                <span class="q-option-letter">${l}</span>
+                <span>${q.opciones[l]||''}</span>
+                ${q.correcta===l?'<span style="margin-left:auto;font-size:12px;color:var(--green)">✓</span>':''}
+              </div>`).join('')
+            : ['A','B','C','D'].map(l=>`
+              <div class="q-option ${q.correcta===l?'correct':''}">
+                <span class="q-option-letter">${l}</span>
+                <span>${q.opciones[l]||''}</span>
+                ${q.correcta===l?'<span style="margin-left:auto;font-size:12px;color:var(--green)">✓</span>':''}
+              </div>`).join('')
+        }
+      </div>
+      <div class="q-feedback">💡 ${q.retroalimentacion||''}</div>
+    </div>`).join('');
+
+  // Answer key
+  document.getElementById('answer-key-grid').innerHTML = questions.map((q,i)=>`
+    <div class="ak-item">
+      <div class="ak-num">${i+1}</div>
+      <div class="ak-ans">${q.correcta}</div>
+    </div>`).join('');
+
+  // Google Forms format
+  const formsText = questions.map((q,i)=>{
+    const tipo = q.tipo||'opcion_multiple';
+    const tipoLabel = {opcion_multiple:'Opción Múltiple',verdadero_falso:'Verdadero/Falso',caso_practico:'Caso Práctico',abierta:'Pregunta Abierta'}[tipo]||'Opción Múltiple';
+    let opts = '';
+    if(tipo==='abierta'){
+      opts = '[Pregunta abierta — el alumno escribe su respuesta]';
+    } else if(tipo==='verdadero_falso'){
+      opts = `A) Verdadero\nB) Falso\n\n✓ Correcta: ${q.correcta==='A'?'Verdadero':'Falso'}`;
+    } else {
+      const letras = tipo==='caso_practico'?['A','B','C','D']:['A','B','C','D'];
+      opts = letras.map(l=>`${l}) ${q.opciones[l]||''}`).join('\n')+`\n\n✓ Correcta: ${q.correcta}`;
+    }
+    return `PREGUNTA ${i+1} [${q.nivel} · ${tipoLabel}]\n${q.pregunta}\n\n${opts}\n─────────────────────────────────`;
+  }).join('\n\n');
+  document.getElementById('forms-output').textContent = formsText;
+}
+
+function showView(view, btn){
+  ['preguntas','clave','forms'].forEach(v=>{
+    document.getElementById(`view-${v}`).style.display = v===view?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function copyForms(){
+  const text = document.getElementById('forms-output').textContent;
+  navigator.clipboard.writeText(text).then(()=>alert('Copiado. Pega en Google Forms o en un documento.'));
+}
+
+function regenerate(){
+  if(!confirm('¿Regenerar el examen? Se crearán preguntas nuevas con los mismos parámetros.')) return;
+  questions = [];
+  document.getElementById('gen-btn').disabled = false;
+  document.getElementById('gen-btn').textContent = '✨ Generar examen';
+  document.getElementById('goto-exam').disabled = true;
+  document.getElementById('gen-progress').style.width = '0%';
+  document.getElementById('gen-status').textContent = 'Listo para generar';
+  document.getElementById('gen-sub').textContent = 'Revisa los parámetros y presiona generar';
+  goStep(3);
+}
+
+function resetAll(){
+  if(!confirm('¿Empezar un examen nuevo? Se borrará el examen actual.')) return;
+  questions = [];
+  document.getElementById('guia-content').value = '';
+  document.getElementById('gen-btn').disabled = false;
+  document.getElementById('gen-btn').textContent = '✨ Generar examen';
+  document.getElementById('goto-exam').disabled = true;
+  document.getElementById('gen-progress').style.width = '0%';
+  document.getElementById('header-info').textContent = '';
+  goStep(1);
+}
+</script>
+</body>
+</html>

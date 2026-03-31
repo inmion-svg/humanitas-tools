@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Maestro · Humanitas T2 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C1620;--s1:#111D2E;--s2:#162030;--border:#1E3040;
+  --gold:#C9843A;--teal:#2A8C9A;--green:#2A9A5A;--purple:#8A5EC8;--red:#C05040;
+  --text:#D8E0E8;--muted:#6A7A8A;--dim:#3A4A5A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 90% 0%,#C9843A0A 0%,transparent 60%),
+             radial-gradient(ellipse 50% 60% at 0% 100%,#2A8C9A08 0%,transparent 60%);}
+
+/* ── Header ── */
+header{background:linear-gradient(135deg,#0A1420,#111D2E);border-bottom:1px solid #C9843A22;
+  padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 4px 30px #00000066;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-title{font-family:'Lora',serif;font-size:16px;color:#D4A870;letter-spacing:.3px;}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px;}
+nav{display:flex;gap:4px;}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--muted);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'Outfit',sans-serif;
+  font-size:13px;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.nav-btn:hover{color:var(--text);border-color:var(--border);}
+.nav-btn.active{background:#C9843A18;border-color:#C9843A55;color:var(--gold);}
+
+main{max-width:1100px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;}
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h2{font-family:'Lora',serif;font-weight:400;font-size:24px;color:var(--gold);margin-bottom:4px;}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:24px;}
+
+/* ── Cards ── */
+.card{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--border);border-radius:12px;padding:18px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+.kpi-card{border-radius:12px;padding:18px;border:1px solid var(--border);
+  background:linear-gradient(135deg,var(--s1),var(--s2));transition:transform .2s;}
+.kpi-card:hover{transform:translateY(-2px);}
+.kpi-val{font-family:'Lora',serif;font-size:28px;margin-bottom:2px;}
+.kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+/* ── Buttons ── */
+.btn-gold{background:linear-gradient(135deg,#C9843A,#A86820);border:none;border-radius:7px;
+  padding:8px 16px;cursor:pointer;color:#0C1420;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;}
+.btn-green{background:linear-gradient(135deg,#2A9A5A,#1A7A40);border:none;border-radius:7px;
+  padding:8px 16px;cursor:pointer;color:#0C1620;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:7px;padding:7px 14px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;transition:all .15s;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── Mat tabs ── */
+.mat-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.mat-tab{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:8px;padding:7px 16px;cursor:pointer;font-family:'Lora',serif;font-size:13px;transition:all .2s;}
+
+/* ── Doc emoji buttons ── */
+.doc-btns{display:flex;gap:6px;align-items:center;}
+.doc-btn{font-size:16px;border-radius:8px;padding:6px 9px;cursor:pointer;border:1px solid var(--border);
+  background:#111D2E;transition:all .15s;min-width:40px;text-align:center;}
+.doc-btn:hover{border-color:var(--gold);}
+.doc-btn.done{border-color:transparent;}
+.doc-btn-label{font-size:9px;text-align:center;display:block;margin-top:2px;}
+
+/* ── Progress bar ── */
+.prog-track{height:4px;background:#1A2A3A;border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+
+/* ── Class row ── */
+.class-row{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;
+  margin-bottom:6px;flex-wrap:wrap;transition:border-color .2s;}
+.class-row:hover{border-color:var(--dim);}
+.class-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Lora',serif;font-size:13px;flex-shrink:0;border:1px solid var(--border);}
+.tema-edit{background:#0E1828;border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:5px 10px;font-family:'Lora',serif;font-size:13px;
+  outline:none;width:100%;}
+
+/* ── Status badge ── */
+.badge-done{font-size:10px;padding:2px 8px;border-radius:20px;background:#2A9A5A22;color:#2A9A5A;border:1px solid #2A9A5A44;font-weight:600;}
+.badge-pend{font-size:10px;padding:2px 8px;border-radius:20px;background:#C9843A15;color:#8A6040;border:1px solid #C9843A33;font-weight:600;}
+
+/* ── Guías grid ── */
+.guias-section{margin-bottom:24px;}
+.guias-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.guia-card{background:#0E1828;border-radius:10px;padding:16px;border:1px solid var(--border);}
+
+/* ── Overlay & Modal ── */
+.overlay{display:none;position:fixed;inset:0;background:#00000099;z-index:200;
+  align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:linear-gradient(135deg,#111D2E,#162030);border:1px solid #C9843A33;
+  border-radius:16px;padding:28px;width:700px;max-width:95vw;max-height:88vh;
+  overflow-y:auto;box-shadow:0 24px 80px #000000BB;animation:fadeIn .2s ease;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+.modal-title{font-family:'Lora',serif;font-size:20px;color:var(--gold);font-weight:400;}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;}
+label.lbl{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;margin-top:14px;}
+input.inp{width:100%;background:#0E1828;border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:10px 13px;font-family:'Lora',serif;font-size:14px;outline:none;transition:border-color .15s;}
+input.inp:focus{border-color:var(--gold);}
+textarea.ta{width:100%;background:#0A1220;border:1px solid var(--border);color:#C8D4E0;
+  border-radius:8px;padding:14px;font-family:monospace;font-size:12px;
+  resize:none;outline:none;line-height:1.75;min-height:300px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+/* ── View doc ── */
+.doc-content{background:#0A1220;border:1px solid var(--border);border-radius:10px;
+  padding:22px;white-space:pre-wrap;word-break:break-word;font-family:'Lora',serif;
+  font-size:13px;color:#C8D4E0;line-height:1.8;max-height:60vh;overflow-y:auto;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.legend-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+
+@media(max-width:700px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .guias-grid{grid-template-columns:1fr;}
+  .nav-label{display:none;}
+  header{padding:0 14px;}
+  main{padding:20px 12px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span style="font-size:24px">🎓</span>
+    <div>
+      <div class="logo-title">Dashboard del Maestro</div>
+      <div class="logo-sub">Aguilar King Inmion · T2 2026</div>
+    </div>
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('hoy',this)">☀️ <span class="nav-label">Hoy</span></button>
+    <button class="nav-btn" onclick="showPage('clases',this)">📋 <span class="nav-label">Clases</span></button>
+    <button class="nav-btn" onclick="showPage('guias',this)">📚 <span class="nav-label">Guías</span></button>
+    <button class="nav-btn" onclick="resetData()" style="margin-left:12px;border-color:#E8504044;color:#E85040" title="Borrar datos y empezar de nuevo">↺ Reset</button>
+  </nav>
+</header>
+
+<main>
+  <div id="page-hoy" class="page active"></div>
+  <div id="page-clases" class="page"></div>
+  <div id="page-guias" class="page"></div>
+</main>
+
+<!-- Modal: Generar / Editar documento -->
+<div class="overlay" id="modal-gen">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="gen-title">Generar documento</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="gen-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('gen')">✕</button>
+    </div>
+    <label class="lbl">Tema de la clase</label>
+    <input class="inp" id="gen-tema" placeholder="ej. Oferta y Demanda en mercados competitivos">
+    <div style="font-size:11px;color:var(--muted);margin:10px 0 14px" id="gen-desc"></div>
+    <button id="gen-btn" onclick="generateDoc()" style="width:100%;padding:11px;font-size:14px;margin-bottom:14px" class="btn-gold">✨ Generar con IA</button>
+    <label class="lbl" id="result-lbl" style="display:none">Resultado — puedes editar antes de guardar</label>
+    <textarea class="ta" id="gen-result" style="display:none" placeholder="El contenido generado aparecerá aquí..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('gen')">Cancelar</button>
+      <button class="btn-green" id="gen-save" style="display:none" onclick="saveDoc()">✓ Guardar documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ver documento -->
+<div class="overlay" id="modal-view">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="view-title"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="view-sub"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-gold" onclick="editCurrentDoc()" style="font-size:11px">✏️ Editar</button>
+        <button class="modal-close" onclick="closeModal('view')">✕</button>
+      </div>
+    </div>
+    <div class="doc-content" id="view-content"></div>
+  </div>
+</div>
+
+<!-- Modal: Guía de estudio -->
+<div class="overlay" id="modal-guia">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="guia-title">Guía de Estudio</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="guia-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('guia')">✕</button>
+    </div>
+    <label class="lbl">Temas que cubre esta guía</label>
+    <input class="inp" id="guia-tema" placeholder="ej. Oferta, Demanda, Elasticidad y Teoría del Consumidor">
+    <button id="guia-btn" onclick="generateGuia()" style="width:100%;padding:11px;font-size:14px;margin:14px 0" class="btn-gold">✨ Generar guía con IA</button>
+    <textarea class="ta" id="guia-result" style="display:none"></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('guia')">Cancelar</button>
+      <button class="btn-green" id="guia-save" style="display:none" onclick="saveGuia()">✓ Guardar guía</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONFIGURACIÓN — edita aquí al inicio del trimestre
+// ════════════════════════════════════════════════════════
+const DOC_META = {
+  presentacion:{ label:"Presentación",         emoji:"🖥️",  color:"#C9843A", desc:"Contenido estructurado para tu presentación de clase" },
+  ensayo:      { label:"Ensayo del Profesor",   emoji:"📖",  color:"#2A8C9A", desc:"Estudio profundo del tema para ir perfectamente preparado" },
+  brief:       { label:"Brief de Clase",        emoji:"📄",  color:"#8A5EC8", desc:"Inicio, desarrollo y cierre de la sesión (un párrafo cada uno)" },
+  reflexion:   { label:"Pregunta de Reflexión", emoji:"💡",  color:"#2A9A5A", desc:"Pregunta final + rúbrica de evaluación para respuestas de 50 palabras" },
+};
+const DOC_KEYS = Object.keys(DOC_META);
+
+// Guía de estudio — entregable especial solo en clases 4 y 10
+const GUIA_ESPECIAL = {
+  label: "Guía de Estudio",
+  emoji: "📚",
+  color: "#E85040",
+  desc: "Guía completa para que los alumnos se preparen para el parcial"
+};
+// Clases que tienen guía de estudio (por número de clase)
+function tieneGuiaEspecial(materiaId, numClase){
+  if(materiaId === 1) return [3, 9].includes(numClase);
+  return [4, 10].includes(numClase);
+}
+
+// Tipo de clase por id (materiaId-numeroClase)
+const TIPO_CLASE = {
+  "1-4":  "parcial",  "2-5":  "parcial",  "3-5":  "parcial",
+  "1-10": "examen",   "2-11": "examen",   "3-11": "examen",
+};
+
+const GUIA_TIPOS = {
+  examen1:{ label:"Guía Examen 1",      emoji:"📝", color:"#C9843A" },
+  examen2:{ label:"Guía Examen 2",      emoji:"📋", color:"#2A8C9A" },
+  final:  { label:"Guía Trabajo Final", emoji:"🏆", color:"#8A5EC8" },
+};
+
+const MATERIAS = [
+  { id:1, nombre:"Bloque VI · Viernes",                      grupo:"18:00-21:00 · Ejecutivo",          color:"#C9843A", icono:"💰", totalClases:10 },
+  { id:2, nombre:"Bloque VI · Sábado",                       grupo:"11:30-14:30 · Ejecutivo",          color:"#2A8C9A", icono:"🏦", totalClases:11 },
+  { id:3, nombre:"Fundamentos · Lunes",                      grupo:"14:00-16:00 · Escolarizado",       color:"#8A5EC8", icono:"🌐", totalClases:11 },
+];
+
+// ── Temas del programa oficial ────────────────────────
+// Bloque VI Financiero: contiene Intro a Finanzas (LACE-0403) + Finanzas Corporativas (LACE-0303) + Planeación y Valuación (LACE-1302)
+// Se distribuyen los temas principales en 11 clases
+const TEMAS_VIE = [
+  "Introducción a la Administración Financiera — mercados de dinero y capital",
+  "La Función Financiera — tesorería, contraloría y director de finanzas",
+  "Axiomas de Finanzas — los 10 principios fundamentales",
+  "PARCIAL 1 — Clases 1-3 · Tema: Sistema Financiero Mexicano (35 min) + Examen (35 min)",
+  "Decisiones de Arrendamiento Financiero y Análisis de Inversiones",
+  "Decisiones de Financiamiento y Estructura de Capital — WACC",
+  "Capital, Deuda y Financiamiento Empresarial — bonos e IPOs",
+  "Política de Dividendos — determinantes y formas de retorno",
+  "Proyectos de Inversión — VPN, TIR y Flujo Descontado",
+  "EXAMEN FINAL — Parcial 2 · Clases 5 a 9",
+];
+
+
+
+const TEMAS_SAB = [
+  "Introducción a la Administración Financiera — mercados de dinero y capital",
+  "La Función Financiera — tesorería, contraloría y director de finanzas",
+  "Axiomas de Finanzas — los 10 principios fundamentales",
+  "Sistema Financiero Mexicano e Introducción a los Mercados Financieros",
+  "PARCIAL 1 — Clases 1-4 · Tema: Decisiones de Arrendamiento Financiero (35 min) + Examen (35 min)",
+  "Decisiones de Financiamiento y Estructura de Capital — WACC",
+  "Capital, Deuda y Financiamiento Empresarial — bonos, deuda convertible, IPOs",
+  "Política de Dividendos — determinantes y formas de retorno",
+  "Proyectos de Inversión — VPN, TIR y Flujo Descontado",
+  "Planeación y Valuación de Empresas — estados pro-forma, valuación por múltiplos",
+  "EXAMEN FINAL — Parcial 2 · Clases 6 a 10",
+];
+const TEMAS_FNI = [
+  "Introducción a los Negocios Internacionales — formas de hacer negocios, bienes, servicios e inversión",
+  "El Factor Cultural frente a los Negocios — impacto cultural y estrategias",
+  "Factores Legales y Políticos en el Comercio Internacional",
+  "El Factor Económico — elementos macroeconómicos y economía de mercado",
+  "PARCIAL 1 — Clases 1-4 · Tema: Teoría del Comercio Internacional (35 min) + Examen (35 min)",
+  "Influencia Gubernamental en el Comercio — barreras arancelarias y no arancelarias, OMC",
+  "Acuerdos Regionales de Integración Económica — TMEC, Unión Europea",
+  "Estrategias de Internacionalización",
+  "La Empresa en el Comercio Global — propiedad intelectual y controversias",
+  "Integración y Proyecto Final — repaso integrador",
+  "EXAMEN FINAL — Parcial 2 · Clases 6 a 10",
+];
+
+const TEMAS = {
+  1: TEMAS_VIE,
+  2: TEMAS_SAB,
+  3: TEMAS_FNI,
+};
+
+// ── Init data ─────────────────────────────────────────
+function makeDoc(){ return { status:"pendiente", contenido:"" }; }
+function makeClases(){
+  const clases = [];
+  MATERIAS.forEach(m => {
+    for(let i=1; i<=m.totalClases; i++){
+      const key = `${m.id}-${i}`;
+      const tipo = TIPO_CLASE[key] || "normal";
+      const tieneGuia = tieneGuiaEspecial(m.id, i);
+      const c = {
+        id: key, materiaId:m.id, numero:i,
+        tema: TEMAS[m.id]?.[i-1]||"",
+        tipo, // "normal" | "parcial" | "examen"
+        tieneGuia,
+        guia: { status:"pendiente", contenido:"" },
+        docs:{}
+      };
+      // Parcial y examen no tienen los 4 documentos normales
+      if(tipo === "normal" || tipo === "parcial") {
+        DOC_KEYS.forEach(k => c.docs[k] = makeDoc());
+      }
+      clases.push(c);
+    }
+  });
+  return clases;
+}
+function makeGuias(){
+  const guias = [];
+  MATERIAS.forEach(m => {
+    Object.keys(GUIA_TIPOS).forEach(tipo => {
+      guias.push({ id:`g${m.id}-${tipo}`, materiaId:m.id, tipo, tema:"", status:"pendiente", contenido:"" });
+    });
+  });
+  return guias;
+}
+
+// ── Storage ───────────────────────────────────────────
+function ls(k,d){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;} }
+function lss(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch{} }
+let clases = ls("dm_T2_clases", makeClases());
+let guias  = ls("dm_T2_guias",  makeGuias());
+function persist(){ lss("dm_T2_clases",clases); lss("dm_T2_guias",guias); }
+
+// ── Helpers ───────────────────────────────────────────
+function progMateria(mid){
+  const mc = clases.filter(c=>c.materiaId===mid && c.tipo==="normal");
+  const total = mc.length * DOC_KEYS.length;
+  const done  = mc.reduce((a,c)=>a+DOC_KEYS.filter(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="listo").length,0);
+  return total===0?0:Math.round(done/total*100);
+}
+function nextPending(mid){
+  return clases.find(c=>c.materiaId===mid && c.tipo==="normal" && c.tema && DOC_KEYS.some(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="pendiente"));
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+let curPage="hoy";
+function showPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("page-"+id).classList.add("active");
+  if(btn) btn.classList.add("active");
+  curPage=id;
+  if(id==="hoy")    renderHoy();
+  if(id==="clases") renderClases();
+  if(id==="guias")  renderGuias();
+}
+
+// ══════════════════════════════════════════════════════
+//  PAGE: HOY
+// ══════════════════════════════════════════════════════
+function renderHoy(){
+  const totalDone = clases.reduce((a,c)=>a+DOC_KEYS.filter(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="listo").length,0);
+  const normalClases = clases.filter(c=>c.tipo==="normal"||c.tipo==="parcial");
+  const totalDocs = normalClases.length * DOC_KEYS.length;
+  const pct = Math.round(totalDone/totalDocs*100);
+  const guiasPend = guias.filter(g=>g&&g.status==="pendiente").length;
+
+  let html = `
+    <h2>Vista de Hoy</h2>
+    <p class="subtitle">Estado general del trimestre y próximos pendientes</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" style="border-color:#C9843A44">
+        <div class="kpi-val" style="color:#C9843A">${totalDone}</div>
+        <div class="kpi-lbl">Docs listos</div>
+      </div>
+      <div class="kpi-card" style="border-color:#2A8C9A44">
+        <div class="kpi-val" style="color:#2A8C9A">${totalDocs - totalDone}</div>
+        <div class="kpi-lbl">Pendientes</div>
+      </div>
+      <div class="kpi-card" style="border-color:#2A9A5A44">
+        <div class="kpi-val" style="color:#2A9A5A">${pct}%</div>
+        <div class="kpi-lbl">Progreso global</div>
+      </div>
+      <div class="kpi-card" style="border-color:#8A5EC844">
+        <div class="kpi-val" style="color:#8A5EC8">${guiasPend}</div>
+        <div class="kpi-lbl">Guías pendientes</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">Próxima clase con pendientes — por materia</div>
+    <div style="display:grid;gap:10px;">
+  `;
+
+  MATERIAS.forEach(m=>{
+    const pct2 = progMateria(m.id);
+    const next = nextPending(m.id);
+    html += `
+      <div class="card" style="border-color:${m.color}33">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <span style="font-size:22px;margin-top:2px">${m.icono}</span>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div>
+                <span style="color:${m.color};font-family:'Lora',serif;font-size:15px">${m.nombre}</span>
+                <span style="color:var(--muted);font-size:12px;margin-left:8px">${m.grupo}</span>
+              </div>
+              <span style="font-size:12px;color:${m.color};font-family:'Lora',serif">${pct2}% listo</span>
+            </div>
+            <div class="prog-track" style="margin-bottom:12px">
+              <div class="prog-fill" style="width:${pct2}%;background:${m.color}"></div>
+            </div>
+    `;
+    if(next){
+      const pendDocs = DOC_KEYS.filter(k=>next.docs[k].status==="pendiente").map(k=>`<span title="${DOC_META[k].label}" style="font-size:15px;cursor:pointer" onclick="openGen(${m.id},${next.numero},'${k}')">${DOC_META[k].emoji}</span>`).join("");
+      const doneDocs = DOC_KEYS.filter(k=>next.docs[k].status==="listo").map(k=>`<span title="${DOC_META[k].label} (listo)" style="font-size:15px;opacity:.4">${DOC_META[k].emoji}</span>`).join("");
+      html += `
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <div>
+                <span style="font-size:11px;color:var(--muted)">Clase ${next.numero} · </span>
+                <span style="font-size:13px;color:#C8D0D8;font-family:'Lora',serif">${next.tema}</span>
+                <div style="margin-top:5px;display:flex;gap:8px;align-items:center">
+                  <span style="font-size:10px;color:var(--muted)">Pendientes:</span>${pendDocs}
+                  ${doneDocs?`<span style="font-size:10px;color:var(--muted);margin-left:4px">Listos:</span>${doneDocs}`:""}
+                </div>
+              </div>
+              <button class="btn-ghost" onclick="goClasesMat(${m.id})" style="font-size:11px">Ver todas →</button>
+            </div>
+      `;
+    } else {
+      html += `<div style="font-size:12px;color:var(--green)">✓ Todo listo para esta materia</div>`;
+    }
+    html += `</div></div></div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById("page-hoy").innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  PAGE: CLASES
+// ══════════════════════════════════════════════════════
+let curMatId = 1;
+function goClasesMat(mid){
+  curMatId = mid;
+  document.querySelectorAll(".nav-btn").forEach((b,i)=>b.classList.toggle("active",i===1));
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-clases").classList.add("active");
+  renderClases();
+}
+
+function renderClases(){
+  const mat = MATERIAS.find(m=>m.id===curMatId)||MATERIAS[0];
+  const mc  = clases.filter(c=>c.materiaId===mat.id);
+  const pct = progMateria(mat.id);
+  const done = mc.reduce((a,c)=>a+DOC_KEYS.filter(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="listo").length,0);
+
+  // Tabs
+  const tabs = MATERIAS.map(m=>`
+    <button class="mat-tab ${m.id===curMatId?"active":""}" style="
+      ${m.id===curMatId?`background:${m.color}22;border-color:${m.color}66;color:${m.color}`:""}
+    " onclick="curMatId=${m.id};renderClases()">
+      ${m.icono} ${m.nombre} <span style="font-size:10px;opacity:.7">(${progMateria(m.id)}%)</span>
+    </button>`).join("");
+
+  // Legend
+  const legend = DOC_KEYS.map(k=>`
+    <span class="legend-item">${DOC_META[k].emoji} ${DOC_META[k].label}</span>`).join("");
+
+  // Rows
+  const rows = mc.map(c=>{
+    const esParcial = c.tipo === "parcial";
+    const esExamen  = c.tipo === "examen";
+    const esEspecial = esParcial || esExamen;
+
+    if(esEspecial){
+      const colorEsp = esParcial ? "#E85040" : "#8A5EC8";
+      const labelEsp = esParcial ? "PARCIAL 1" : "EXAMEN FINAL";
+      const iconEsp  = esParcial ? "📝" : "🎓";
+      const hasDocs  = esParcial;
+      const docBtns  = hasDocs ? DOC_KEYS.map(k=>{
+        const d = c.docs && c.docs[k];
+        const m2 = DOC_META[k];
+        const isDone = d && d.status==="listo";
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <button class="doc-btn ${isDone?"done":""}"
+            style="${isDone?`background:${m2.color}20;border-color:${m2.color}55`:""}"
+            onclick="${isDone?`openView(${c.materiaId},${c.numero},'${k}')`:`openGen(${c.materiaId},${c.numero},'${k}')`}"
+            title="${isDone?"Ver: "+m2.label:"Generar: "+m2.label}">${m2.emoji}</button>
+          <span class="doc-btn-label" style="color:${isDone?m2.color:"var(--dim)"}">${isDone?"ver":"gen"}</span>
+        </div>`;
+      }).join("") : "";
+      return `<div class="class-row" style="border-color:${colorEsp}55;background:${colorEsp}08" id="row-${c.id}">
+        <div class="class-num" style="background:${colorEsp}22;border-color:${colorEsp}66;color:${colorEsp}">${c.numero}</div>
+        <div style="flex:1;min-width:140px">
+          <div style="font-family:'Lora',serif;font-size:13px;color:${colorEsp};font-weight:600">${iconEsp} ${labelEsp}</div>
+          <div style="font-size:11px;color:#6A7A8A;margin-top:2px">${c.tema}</div>
+        </div>
+        ${hasDocs?`<div class="doc-btns">${docBtns}</div>`:`<span style="font-size:11px;color:${colorEsp};padding:4px 10px;border:1px solid ${colorEsp}44;border-radius:6px">Sin documentos</span>`}
+      </div>`;
+    }
+
+    // Normal row
+    const allDone = DOC_KEYS.every(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="listo");
+    const doneCnt = DOC_KEYS.filter(k=>c.docs&&c.docs[k]&&c.docs&&c.docs[k]&&c.docs[k].status==="listo").length;
+    const guiaDone = c.tieneGuia && c.guia && c.guia.status==="listo";
+    const totalDocs = 4 + (c.tieneGuia ? 1 : 0);
+    const doneTotalCount = doneCnt + (guiaDone ? 1 : 0);
+    const allComplete = allDone && (!c.tieneGuia || guiaDone);
+
+    const btns = DOC_KEYS.map(k=>{
+      const d = c.docs && c.docs[k];
+      const m2 = DOC_META[k];
+      const isDone = d && d.status==="listo";
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <button class="doc-btn ${isDone?"done":""}"
+          style="${isDone?`background:${m2.color}20;border-color:${m2.color}55`:""}"
+          onclick="${isDone?`openView(${c.materiaId},${c.numero},'${k}')`:`openGen(${c.materiaId},${c.numero},'${k}')`}"
+          title="${isDone?"Ver: "+m2.label:"Generar: "+m2.label}">${m2.emoji}</button>
+        <span class="doc-btn-label" style="color:${isDone?m2.color:"var(--dim)"}">${isDone?"ver":"gen"}</span>
+      </div>`;
+    }).join("");
+
+    const guiaBtn = c.tieneGuia ? `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:8px;padding-left:8px;border-left:1px solid #1E3040">
+        <button class="doc-btn ${guiaDone?"done":""}"
+          style="${guiaDone?`background:${GUIA_ESPECIAL.color}20;border-color:${GUIA_ESPECIAL.color}55`:""}"
+          onclick="${guiaDone?`openViewGuiaEspecial('${c.id}')`:`openGenGuiaEspecial('${c.id}')`}"
+          title="${guiaDone?"Ver: Guía de Estudio":"Generar: Guía de Estudio"}">${GUIA_ESPECIAL.emoji}</button>
+        <span class="doc-btn-label" style="color:${guiaDone?GUIA_ESPECIAL.color:"var(--dim)"}">${guiaDone?"ver":"guía"}</span>
+      </div>` : "";
+
+    return `<div class="class-row" style="border-color:${allComplete?"#2A9A5A44":mat.color+"22"}" id="row-${c.id}">
+      <div class="class-num" style="background:${allComplete?"#2A9A5A18":`${mat.color}15`};border-color:${allComplete?"#2A9A5A55":`${mat.color}44`};color:${allComplete?"var(--green)":mat.color}">${c.numero}</div>
+      <div style="flex:1;min-width:140px">
+        <div id="tema-display-${c.id}" onclick="editTema('${c.id}')" style="font-family:'Lora',serif;font-size:13px;color:${c.tema?"#C8D0D8":"var(--dim)"};cursor:text" title="Clic para editar">
+          ${c.tema||"Clic para agregar tema..."}
+        </div>
+        ${c.tieneGuia?`<div style="font-size:10px;color:#E85040;margin-top:2px">📚 Entregar Guía de Estudio esta clase</div>`:""}
+        ${doneTotalCount>0&&doneTotalCount<totalDocs&&!esEspecial?`<div style="font-size:10px;color:${mat.color};margin-top:1px">${doneTotalCount}/${totalDocs} documentos</div>`:""}
+      </div>
+      <div class="doc-btns" style="display:flex;align-items:flex-start">${btns}${guiaBtn}</div>
+      ${allComplete?`<span class="badge-done" style="white-space:nowrap">✓ Completa</span>`:""}
+    </div>`;
+  }).join("");
+
+  document.getElementById("page-clases").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2>Control de Clases</h2>
+      <span style="font-size:13px;color:var(--green);font-family:'Lora',serif">${done}/${mc.length*4} documentos</span>
+    </div>
+    <p class="subtitle">Clic en el emoji para generar o ver · Clic en el tema para editar</p>
+    <div class="mat-tabs">${tabs}</div>
+    <div style="margin-bottom:6px">
+      <div class="prog-track" style="height:5px">
+        <div class="prog-fill" style="width:${pct}%;background:${mat.color}"></div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:${mat.color};margin-top:4px">${pct}% completado</div>
+    </div>
+    <div class="legend" style="margin-bottom:14px">${legend}</div>
+    <div>${rows}</div>
+  `;
+}
+
+function editTema(cid){
+  const c = clases.find(x=>x.id===cid); if(!c) return;
+  const display = document.getElementById("tema-display-"+cid); if(!display) return;
+  const inp = document.createElement("input");
+  inp.className="tema-edit"; inp.value=c.tema; inp.placeholder="Escribe el tema de la clase...";
+  const mat = MATERIAS.find(m=>m.id===c.materiaId);
+  inp.style.borderColor=mat?.color||"var(--gold)";
+  inp.onblur = ()=>{ clases=clases.map(x=>x.id===cid?{...x,tema:inp.value}:x); persist(); renderClases(); };
+  inp.onkeydown = e=>{ if(e.key==="Enter")inp.blur(); if(e.key==="Escape")renderClases(); };
+  display.replaceWith(inp); inp.focus();
+}
+
+// ══════════════════════════════════════════════════════
+//  PAGE: GUÍAS
+// ══════════════════════════════════════════════════════
+function renderGuias(){
+  const secs = MATERIAS.map(m=>{
+    const mg = guias.filter(g=>g.materiaId===m.id);
+    const cards = mg.map(g=>{
+      const ti = GUIA_TIPOS[g.tipo];
+      const done = g.status==="listo";
+      return `<div class="guia-card" style="border-color:${done?"#2A9A5A44":ti.color+"33"}">
+        <div style="font-size:22px;margin-bottom:8px">${ti.emoji}</div>
+        <div style="font-family:'Lora',serif;font-size:14px;color:${done?"var(--green)":ti.color};margin-bottom:4px">${ti.label}</div>
+        <div onclick="editGuiaTema('${g.id}')" id="gtema-${g.id}"
+          style="font-size:11px;color:var(--muted);margin-bottom:10px;cursor:text;min-height:14px"
+          title="Clic para editar los temas">
+          ${g.tema||"Temas a cubrir..."}
+        </div>
+        <span class="${done?"badge-done":"badge-pend"}">${done?"✓ Lista":"Pendiente"}</span>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button onclick="${done?`openViewGuia('${g.id}')`:`openGenGuia('${g.id}')`}"
+            style="flex:1;padding:8px 0;border:none;border-radius:7px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:#0C1420;background:linear-gradient(135deg,${done?"#2A9A5A,#1A7A40":ti.color+","+ti.color+"CC"})">
+            ${done?"👁 Ver":"✨ Generar"}
+          </button>
+          ${done?`<button onclick="openGenGuia('${g.id}')" class="btn-ghost" style="font-size:12px">↺</button>`:""}
+        </div>
+      </div>`;
+    }).join("");
+    return `<div class="guias-section card" style="border-color:${m.color}33">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid ${m.color}22">
+        <span style="font-size:18px">${m.icono}</span>
+        <span style="color:${m.color};font-family:'Lora',serif;font-size:15px">${m.nombre}</span>
+        <span style="color:var(--muted);font-size:12px">${m.grupo}</span>
+      </div>
+      <div class="guias-grid">${cards}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("page-guias").innerHTML = `
+    <h2>Guías de Estudio</h2>
+    <p class="subtitle">3 guías por materia · Clic en los temas para editarlos antes de generar</p>
+    <div style="display:grid;gap:16px">${secs}</div>
+  `;
+}
+
+function editGuiaTema(gid){
+  const g = guias.find(x=>x.id===gid); if(!g) return;
+  const el = document.getElementById("gtema-"+gid); if(!el) return;
+  const inp = document.createElement("input");
+  const ti = GUIA_TIPOS[g.tipo];
+  inp.style.cssText=`background:#0E1828;border:1px solid ${ti.color};color:var(--text);border-radius:5px;padding:4px 8px;font-size:12px;width:100%;outline:none;font-family:'Outfit',sans-serif;margin-bottom:2px`;
+  inp.value=g.tema; inp.placeholder="Temas a cubrir...";
+  inp.onblur=()=>{ guias=guias.map(x=>x.id===gid?{...x,tema:inp.value}:x); persist(); renderGuias(); };
+  inp.onkeydown=e=>{ if(e.key==="Enter")inp.blur(); if(e.key==="Escape")renderGuias(); };
+  el.replaceWith(inp); inp.focus();
+}
+
+// ══════════════════════════════════════════════════════
+//  GENERATE MODAL — DOCUMENTOS DE CLASE
+// ══════════════════════════════════════════════════════
+let curGen = {}; // {matId, claseNum, docKey}
+
+function openGen(matId, claseNum, docKey){
+  const c = clases.find(x=>x.materiaId===matId && x.numero===claseNum); if(!c) return;
+  const m = MATERIAS.find(x=>x.id===matId);
+  const dm = DOC_META[docKey];
+  curGen = {matId, claseNum, docKey};
+
+  document.getElementById("gen-title").textContent = dm.emoji+" "+dm.label;
+  document.getElementById("gen-title").style.color = dm.color;
+  document.getElementById("gen-sub").textContent = m.nombre+" · Clase "+claseNum;
+  document.getElementById("gen-desc").innerHTML = "📌 "+dm.desc;
+  document.getElementById("gen-tema").value = c.tema||"";
+  document.getElementById("gen-btn").style.background = `linear-gradient(135deg,${dm.color},${dm.color}AA)`;
+
+  const existing = c.docs[docKey].contenido;
+  document.getElementById("gen-result").style.display = existing?"block":"none";
+  document.getElementById("result-lbl").style.display = existing?"block":"none";
+  document.getElementById("gen-save").style.display = existing?"block":"none";
+  document.getElementById("gen-result").value = existing||"";
+  document.getElementById("gen-btn").textContent = existing?"✨ Regenerar":"✨ Generar con IA";
+
+  document.getElementById("modal-gen").classList.add("open");
+  setTimeout(()=>document.getElementById("gen-tema").focus(),100);
+}
+
+async function generateDoc(){
+  const {matId, claseNum, docKey} = curGen;
+  const tema = document.getElementById("gen-tema").value.trim();
+  if(!tema){ alert("Escribe el tema de la clase primero"); return; }
+  const m = MATERIAS.find(x=>x.id===matId);
+
+  // Update tema in clase
+  clases = clases.map(c=>(c.materiaId===matId&&c.numero===claseNum)?{...c,tema}:c);
+  persist();
+
+  const btn = document.getElementById("gen-btn");
+  btn.textContent = "✨ Generando con IA..."; btn.disabled = true;
+
+  try {
+    const prompt = buildPrompt(docKey, tema, m.nombre);
+    const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
+
+    if(docKey === 'ensayo'){
+      // Vercel allows 60s timeout — single call for full essay
+      const r = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:modelToUse,max_tokens:3500,messages:[{role:"user",content:prompt}]})});
+      const d = await r.json();
+      if(d.error) throw new Error(d.error.message);
+      document.getElementById("gen-result").value = d.content?.[0]?.text || "Sin respuesta";
+    } else {
+      const res = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:modelToUse,max_tokens:800,messages:[{role:"user",content:prompt}]})});
+      const data = await res.json();
+      if(data.error) throw new Error(data.error.message);
+      document.getElementById("gen-result").value = data.content?.[0]?.text || "Sin respuesta";
+    }
+
+    document.getElementById("gen-result").style.display = "block";
+    document.getElementById("result-lbl").style.display = "block";
+    document.getElementById("gen-save").style.display = "block";
+  } catch(e) {
+    document.getElementById("gen-result").value = "Error: " + e.message + ". Intenta de nuevo.";
+    document.getElementById("gen-result").style.display = "block";
+  }
+  btn.textContent = "✨ Regenerar"; btn.disabled = false;
+}
+
+function saveDoc(){
+  const {matId, claseNum, docKey} = curGen;
+  const contenido = document.getElementById("gen-result").value;
+  clases = clases.map(c=>{
+    if(c.materiaId===matId && c.numero===claseNum){
+      return {...c, docs:{...c.docs, [docKey]:{status:"listo",contenido}}};
+    }
+    return c;
+  });
+  persist();
+  closeModal("gen");
+  if(curPage==="clases") renderClases();
+  if(curPage==="hoy") renderHoy();
+}
+
+// ══════════════════════════════════════════════════════
+//  VIEW MODAL — DOCUMENTOS
+// ══════════════════════════════════════════════════════
+let curView = {};
+
+function openView(matId, claseNum, docKey){
+  const c = clases.find(x=>x.materiaId===matId && x.numero===claseNum); if(!c) return;
+  const m = MATERIAS.find(x=>x.id===matId);
+  const dm = DOC_META[docKey];
+  curView = {matId, claseNum, docKey};
+
+  document.getElementById("view-title").textContent = dm.emoji+" "+dm.label;
+  document.getElementById("view-title").style.color = dm.color;
+  document.getElementById("view-sub").textContent = m.nombre+" · Clase "+claseNum+" — "+c.tema;
+  document.getElementById("view-content").textContent = c.docs[docKey].contenido||"Sin contenido guardado.";
+  document.getElementById("modal-view").classList.add("open");
+}
+
+function editCurrentDoc(){
+  closeModal("view");
+  const {matId,claseNum,docKey} = curView;
+  openGen(matId, claseNum, docKey);
+}
+
+// ══════════════════════════════════════════════════════
+//  GUÍAS MODAL
+// ══════════════════════════════════════════════════════
+let curGuiaId = null;
+
+function openGenGuia(gid){
+  const g = guias.find(x=>x.id===gid); if(!g) return;
+  const m = MATERIAS.find(x=>x.id===g.materiaId);
+  const ti = GUIA_TIPOS[g.tipo];
+  curGuiaId = gid;
+
+  document.getElementById("guia-title").textContent = ti.emoji+" "+ti.label;
+  document.getElementById("guia-title").style.color = ti.color;
+  document.getElementById("guia-sub").textContent = m.nombre;
+  document.getElementById("guia-tema").value = g.tema||"";
+  document.getElementById("guia-btn").style.background = `linear-gradient(135deg,${ti.color},${ti.color}AA)`;
+  const existing = g.contenido;
+  document.getElementById("guia-result").style.display = existing?"block":"none";
+  document.getElementById("guia-save").style.display = existing?"block":"none";
+  document.getElementById("guia-result").value = existing||"";
+  document.getElementById("guia-btn").textContent = existing?"✨ Regenerar":"✨ Generar guía con IA";
+  document.getElementById("modal-guia").classList.add("open");
+}
+
+async function generateGuia(){
+  const g = guias.find(x=>x.id===curGuiaId); if(!g) return;
+  const m = MATERIAS.find(x=>x.id===g.materiaId);
+  const ti = GUIA_TIPOS[g.tipo];
+  const tema = document.getElementById("guia-tema").value.trim();
+  guias = guias.map(x=>x.id===curGuiaId?{...x,tema}:x);
+
+  const btn = document.getElementById("guia-btn");
+  btn.textContent="✨ Generando guía..."; btn.disabled=true;
+
+  try {
+    const prompt = buildGuiaPrompt({...g,tema}, m.nombre);
+    const res = await fetch("/api/claude",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, messages:[{role:"user",content:prompt}] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text||"Error";
+    document.getElementById("guia-result").value=text;
+    document.getElementById("guia-result").style.display="block";
+    document.getElementById("guia-save").style.display="block";
+  } catch { document.getElementById("guia-result").value="Error al conectar. Intenta de nuevo."; }
+  btn.textContent="✨ Regenerar"; btn.disabled=false;
+}
+
+function saveGuia(){
+  const contenido = document.getElementById("guia-result").value;
+  guias = guias.map(g=>g.id===curGuiaId?{...g,status:"listo",contenido}:g);
+  persist(); closeModal("guia");
+  if(curPage==="guias") renderGuias();
+  if(curPage==="hoy") renderHoy();
+}
+
+function openViewGuia(gid){
+  const g = guias.find(x=>x.id===gid); if(!g) return;
+  const m = MATERIAS.find(x=>x.id===g.materiaId);
+  const ti = GUIA_TIPOS[g.tipo];
+  curView = {guiaId:gid};
+  document.getElementById("view-title").textContent = ti.emoji+" "+ti.label;
+  document.getElementById("view-title").style.color = ti.color;
+  document.getElementById("view-sub").textContent = m.nombre+(g.tema?" · "+g.tema:"");
+  document.getElementById("view-content").textContent = g.contenido||"Sin contenido.";
+  document.getElementById("modal-view").classList.add("open");
+}
+
+// ── Prompts ───────────────────────────────────────────
+
+// Regla de fuentes — aplica a TODOS los entregables
+const REGLA_FUENTES = `
+REGLA DE FUENTES (obligatoria en todos los entregables):
+Todas las fuentes, datos, estadísticas y referencias deben ser:
+- Académicas: libros de texto universitarios, artículos en revistas indexadas (Scopus, Web of Science, Redalyc).
+- Gubernamentales o institucionales: Banxico, CNBV, INEGI, SHCP, SE, Banco Mundial, FMI, OCDE, ONU.
+- Verificables: con autor, año, editorial o URL institucional real. NUNCA inventar datos ni fuentes.
+- Actuales cuando sea posible: preferir publicaciones de los últimos 5 años.
+Incluye la cita completa en formato APA al final de cada documento.`;
+
+// Bibliografía prioritaria por materia
+const BIBLIO_FINANCIERO = `
+Bibliografía prioritaria de la materia (usa estas fuentes primero):
+- Brealey, R., Myers, S. & Allen, F. (2023). Principles of Corporate Finance, 14a ed. McGraw-Hill.
+- Ross, S., Westerfield, R. & Jordan, B. (2022). Fundamentals of Corporate Finance, 13a ed. McGraw-Hill.
+- Núñez, L. (2004). Estructura Financiera. PAC.
+- Bravo Santillán, M. de la Luz (2007). Introducción a las Finanzas. Pearson Educación de México.
+- Copeland, T., Koller, T. & Murrin, J. (2000). Valuation: Measuring and Managing the Value of Companies. Wiley.
+- Damodaran, A. (2001). Investment Valuation. Wiley.`;
+
+const BIBLIO_NEGOCIOS = `
+Bibliografía prioritaria de la materia (usa estas fuentes primero):
+- Daniels, J. D., Radebaugh, L. H. & Sullivan, D. P. (2013). Negocios Internacionales. Pearson.
+- Hill, C. W. L. (2015). Negocios Internacionales: Competencia en el Mercado Global. McGraw-Hill.
+- Cuadrado, C. (2007). Protocolo en las Relaciones de la Empresa. Fundación Confemental.
+- OMC, Banco Mundial, OCDE y Banxico como fuentes institucionales complementarias.`;
+
+function buildPrompt(docKey, tema, materia){
+  const m = MATERIAS.find(x=>x.nombre===materia)||MATERIAS[0];
+  const esEjecutivo = m.grupo.includes("Ejecutivo");
+  const esFundamentos = materia.includes("Negocios Internacionales");
+  const duracion = esFundamentos ? "2 horas" : "3 horas";
+  const biblio = esFundamentos ? BIBLIO_NEGOCIOS : BIBLIO_FINANCIERO;
+
+  const perfil = esEjecutivo
+    ? "profesionistas adultos en modalidad ejecutiva (trabajan y estudian, tienen experiencia laboral real en empresas mexicanas)"
+    : "estudiantes universitarios de licenciatura en modalidad escolarizada (onceavo trimestre, Administración y Contabilidad)";
+
+  const ctx = `Eres asistente académico de un profesor de la Universidad Humanitas, campus Mérida.
+Materia: "${materia}"
+Tema de esta clase: "${tema}"
+Duración de la clase: ${duracion}
+Perfil de alumnos: ${perfil}
+${biblio}
+${REGLA_FUENTES}`;
+
+  // ── ENSAYO ──────────────────────────────────────────
+  const ensayo_financiero = `${ctx}
+
+Escribe un ENSAYO DE ESTUDIO PROFUNDO Y EXHAUSTIVO para que el profesor domine completamente el tema antes de impartir una clase de 3 horas. El ensayo debe ser suficientemente completo para que el profesor pueda contestar cualquier pregunta durante la clase y conectar el tema con el mundo real. No hay límite de palabras — prioriza la profundidad y completitud sobre la brevedad.
+
+Estructura obligatoria:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. CONTEXTO HISTÓRICO Y VISIÓN MACRO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Explica de dónde viene este concepto: cuándo surgió, quiénes lo desarrollaron, cómo ha evolucionado hasta hoy. Incluye el contexto económico global y específicamente en México y Latinoamérica. ¿Por qué este tema es relevante hoy en el mundo de los negocios?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CONCEPTOS CLAVE Y DEFINICIONES PRECISAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Define con precisión absoluta todos los conceptos fundamentales del tema. Para cada concepto:
+• Definición exacta y técnica (no vaga ni general)
+• De dónde viene el término o concepto
+• Cómo se usa en la práctica empresarial
+• Qué lo confunde con otros conceptos similares (errores comunes)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. DESARROLLO TEÓRICO PROFUNDO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Desarrolla los modelos, teorías y marcos conceptuales principales del tema. Incluye fórmulas o esquemas si aplican. Explica los autores académicos más importantes que han estudiado este tema y cuáles son sus aportaciones clave. Conecta la teoría con su aplicación práctica.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. DATOS Y ESTADÍSTICAS ACTUALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Presenta 5-7 cifras reales y recientes (últimos 3 años) que ilustren la magnitud e importancia del tema. Prioriza datos de México, pero incluye referencias internacionales cuando den contexto. Cada dato debe incluir su fuente completa en formato APA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. CASOS DE EMPRESAS MEXICANAS REALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Desarrolla 3 casos concretos y detallados de empresas mexicanas reales donde este tema sea central. Para cada caso:
+• Nombre de la empresa y contexto
+• El problema o decisión financiera específica
+• Cómo aplicaron (o fallaron en aplicar) el concepto del tema
+• Resultado medible: cifras, impacto en valor, lección aprendida
+Usa empresas conocidas: FEMSA, Bimbo, CEMEX, Banorte, BBVA México, Liverpool, Walmart México, Soriana, América Móvil, Pemex, etc.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. CONEXIONES CON EL CURSO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+¿Cómo se relaciona este tema con los temas anteriores del Bloque Financiero? ¿Con qué temas futuros conecta? ¿Cómo encaja dentro de la visión integral de las finanzas corporativas?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. PREGUNTAS DIFÍCILES DE LOS ALUMNOS — CON RESPUESTAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Lista las 6-8 preguntas más desafiantes que pueden hacer los alumnos ejecutivos (que tienen experiencia laboral y cuestionan desde la práctica), con respuestas completas, directas y bien fundamentadas para cada una. Incluye también posibles objeciones o contraejemplos y cómo responderlos.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. BIBLIOGRAFÍA COMPLETA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Lista todas las fuentes citadas en el ensayo en formato APA. Incluye al menos 6 fuentes: combina los libros de la bibliografía prioritaria de la materia con fuentes institucionales (Banxico, CNBV, INEGI, Banco Mundial) y artículos académicos relevantes.
+
+TONO Y ESTILO:
+- Académico pero claro y directo. Sin relleno ni frases vacías.
+- Escribe como si estuvieras explicándole al profesor, no al alumno.
+- Cada sección debe ser sustancial — no listas cortas, sino párrafos desarrollados.
+- Los datos siempre con fuente. Los ejemplos siempre con nombre real de empresa.`;
+
+  // ── ENSAYO FUNDAMENTOS (2 horas, 1500 palabras) ────
+  const ensayo_fundamentos = `${ctx}
+
+Escribe un ENSAYO DE ESTUDIO de aproximadamente 1,500 palabras para que el profesor domine el tema antes de impartir una clase de 2 horas. Debe ser completo pero enfocado — cubre lo esencial con profundidad sin extenderse en detalles secundarios.
+
+Estructura obligatoria:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. CONTEXTO HISTÓRICO Y VISIÓN GLOBAL (250 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Origen del concepto, evolución histórica y relevancia actual en el comercio internacional. Énfasis en el contexto de México como economía abierta y su posición en el comercio global (TMEC, relación con EUA, exportaciones manufactureras).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CONCEPTOS CLAVE Y DEFINICIONES PRECISAS (300 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Todos los términos fundamentales del tema con definición exacta y técnica. Incluye cómo se usan en la práctica empresarial internacional.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. DATOS Y ESTADÍSTICAS ACTUALES (200 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4-5 cifras reales y recientes (últimos 3 años) con fuente institucional verificable. Prioriza datos de México en el contexto internacional: comercio exterior, IED, exportaciones, etc.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CASO EMPRESARIAL REAL (250 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Un caso concreto y detallado de una empresa mexicana o multinacional en México que ilustre el tema. Qué hicieron, cuándo, por qué y con qué resultado medible.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. PREGUNTAS FRECUENTES DE LOS ALUMNOS (300 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Las 4-5 preguntas más comunes o desafiantes sobre el tema, con respuesta directa y bien fundamentada para cada una.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. BIBLIOGRAFÍA (200 palabras)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4-5 fuentes en formato APA: libros de la bibliografía prioritaria + fuentes institucionales (SE, Banxico, OMC, Banco Mundial).
+
+TONO: Académico, directo, sin relleno. Cada dato con fuente. Ejemplos con nombres reales.`;
+
+  // ── PRESENTACIÓN ────────────────────────────────────
+  const presentacion = `${ctx}
+
+Genera el CONTENIDO COMPLETO Y DETALLADO para una presentación de clase de ${duracion}.
+
+El profesor usa presentaciones minimalistas (una idea por diapositiva), así que entrega el CONTENIDO de cada diapositiva, no el diseño. Para cada diapositiva indica:
+- El título (corto, impactante)
+- El contenido principal: dato, concepto, pregunta o idea central
+- Una nota para el profesor: qué decir, qué ejemplo usar, cuánto tiempo dedicar
+
+Estructura:
+
+DIAPOSITIVA 1 — APERTURA (5 min)
+Pregunta detonadora que conecte el tema con la experiencia real de los alumnos. Una sola pregunta que genere discusión antes de explicar nada.
+
+DIAPOSITIVAS 2-3 — CONTEXTO (15 min)
+El por qué del tema. Datos actuales que justifiquen su importancia. Una cifra impactante de México o Latinoamérica.
+
+DIAPOSITIVAS 4-7 — DESARROLLO CONCEPTUAL (${esFundamentos ? "40 min" : "70 min"})
+Los conceptos clave uno por diapositiva. Para cada uno: definición en una frase, ejemplo real, aplicación práctica.
+
+DIAPOSITIVA 8 — CASO EMPRESARIAL REAL (${esFundamentos ? "20 min" : "30 min"})
+Una empresa mexicana real. Datos concretos. Qué decidieron, por qué, qué resultado tuvo.
+
+DIAPOSITIVA 9 — ACTIVIDAD (${esFundamentos ? "25 min" : "40 min"})
+Dinámica grupal o ejercicio práctico conectado al tema. Instrucciones exactas para el profesor.
+
+DIAPOSITIVA 10 — CIERRE Y REFLEXIÓN (10 min)
+Los 3 puntos que deben quedarse en la memoria. La pregunta de reflexión final.
+
+FUENTES: Todos los datos y estadísticas presentados deben provenir de fuentes académicas o institucionales verificables. Cítalas al pie de cada diapositiva donde aparezcan.`;
+
+  // ── BRIEF ───────────────────────────────────────────
+  const brief = `${ctx}
+
+Redacta el BRIEF DE CLASE — guía de conducción para el profesor durante la sesión de ${duracion}.
+
+Formato: tres bloques temporales claros y accionables. El profesor debe poder seguirlo durante la clase sin perder el hilo.
+
+━━ INICIO (${esFundamentos ? "15 min" : "20 min"})
+• Pregunta detonadora exacta para abrir la clase — escríbela textualmente
+• Cómo conectar con la clase anterior (qué recordar o preguntar)
+• Actividad de calentamiento: qué hacer, cómo organizarlo, qué esperar de los alumnos
+• Qué escribir en el pizarrón o mostrar para enmarcar el tema
+
+━━ DESARROLLO (${esFundamentos ? "80 min" : "130 min"})
+Secuencia minuto a minuto de los subtemas:
+• En qué orden presentar los conceptos y por qué ese orden
+• Qué ejemplo usar para cada concepto (ejemplos específicos, no genéricos)
+• En qué momento hacer pausa para preguntas
+• Qué dinámica o ejercicio incluir para verificar comprensión
+• Señales de alerta: si los alumnos no entienden X, explicar con Y
+• Cómo manejar a alumnos ejecutivos que cuestionen desde su experiencia laboral
+
+━━ CIERRE (${esFundamentos ? "25 min" : "30 min"})
+• Las 3 ideas que deben quedarse en la memoria de los alumnos — escríbelas textualmente
+• Cómo presentar la pregunta de reflexión (instrucciones exactas al alumno)
+• Cómo conectar con el tema de la siguiente clase
+• Tarea o lectura recomendada si aplica
+
+TONO: Instrucciones directas para el profesor, no para el alumno. Concreto y accionable. Sin teoría — solo qué hacer y cuándo.
+${REGLA_FUENTES}`;
+
+  // ── REFLEXIÓN ───────────────────────────────────────
+  const reflexion = `${ctx}
+
+Genera la PREGUNTA DE REFLEXIÓN FINAL de la clase y todos los materiales necesarios para evaluarla y retroalimentarla.
+
+━━ PREGUNTA DE REFLEXIÓN
+Una sola pregunta de alto impacto que:
+• Conecte el tema con una situación real, actual y relevante para el alumno
+• No tenga una única respuesta correcta — invite al pensamiento crítico y a la argumentación
+• Pueda responderse en exactamente 50 palabras con profundidad real
+• Sea diferente a preguntas de memorización — debe requerir análisis y posición personal
+• Para alumnos ejecutivos: que conecte con su experiencia laboral real
+
+━━ INSTRUCCIÓN EXACTA PARA EL ALUMNO
+Escribe textualmente cómo presentarás la pregunta al grupo. Incluye:
+• El enunciado completo de la pregunta
+• La instrucción de formato: "Responde en exactamente 50 palabras"
+• El tiempo que tienen para responder
+• Si es individual o en equipo
+
+━━ RÚBRICA DE EVALUACIÓN (100 puntos)
+Criterio 1 — Comprensión conceptual (25 pts)
+Qué demuestra una respuesta excelente / regular / insuficiente en este criterio.
+
+Criterio 2 — Argumentación y pensamiento crítico (25 pts)
+Qué demuestra una respuesta excelente / regular / insuficiente.
+
+Criterio 3 — Aplicación práctica o conexión con la realidad (25 pts)
+Qué demuestra una respuesta excelente / regular / insuficiente.
+
+Criterio 4 — Claridad, precisión y redacción en 50 palabras (25 pts)
+Qué demuestra una respuesta excelente / regular / insuficiente.
+
+━━ EJEMPLOS DE RESPUESTA
+Respuesta EXCELENTE (muestra exactamente cómo se ve una respuesta de 50 palabras que obtenga 90-100 pts)
+Respuesta REGULAR (muestra cómo se ve una respuesta de 50 palabras que obtenga 60-70 pts)
+Respuesta INSUFICIENTE (muestra cómo se ve una respuesta de 50 palabras que obtenga menos de 60 pts)
+
+━━ RETROALIMENTACIÓN SUGERIDA
+Qué decirle al grupo después de leer sus respuestas. Puntos clave a reforzar y errores comunes a corregir.
+${REGLA_FUENTES}`;
+
+  const map = {
+    presentacion,
+    ensayo: esFundamentos ? ensayo_fundamentos : ensayo_financiero,
+    brief,
+    reflexion,
+  };
+  return map[docKey] || `${ctx}\n\nGenera el documento solicitado de manera completa y profesional.`;
+}
+
+function buildGuiaPrompt(g, materia){
+  const ti = GUIA_TIPOS[g.tipo];
+  const esFundamentos = materia.includes("Negocios Internacionales");
+  const biblio = esFundamentos ? BIBLIO_NEGOCIOS : BIBLIO_FINANCIERO;
+  return `Eres asistente académico de un profesor de la Universidad Humanitas.
+Materia: "${materia}"
+Temas que cubre esta guía: "${g.tema||"temas del curso"}"
+Tipo de evaluación: ${ti.label}
+${biblio}
+${REGLA_FUENTES}
+
+Genera una GUÍA DE ESTUDIO COMPLETA Y EXHAUSTIVA para los alumnos.
+
+━━ 1. ¿QUÉ NECESITO SABER?
+Objetivos de aprendizaje claros y medibles. Qué debe poder hacer el alumno al terminar de estudiar esta guía.
+
+━━ 2. MAPA CONCEPTUAL DEL TEMA
+Relación entre los conceptos principales. Cómo se conectan entre sí.
+
+━━ 3. CONCEPTOS CLAVE CON DEFINICIONES PRECISAS
+Todos los términos importantes con definición exacta, ejemplo de aplicación y posible confusión con otros conceptos.
+
+━━ 4. MODELOS, FÓRMULAS O MARCOS CONCEPTUALES
+Si aplican: explica cada fórmula o modelo con sus variables, su interpretación y un ejemplo resuelto paso a paso.
+
+━━ 5. PREGUNTAS TIPO EXAMEN CON RESPUESTAS DETALLADAS
+8-10 preguntas variadas (conceptuales, de aplicación y de análisis) con respuesta completa y explicación del razonamiento.
+
+━━ 6. EJERCICIOS RESUELTOS PASO A PASO
+3-5 ejercicios prácticos resueltos con explicación de cada paso.
+
+━━ 7. ERRORES COMUNES A EVITAR
+Los 5 errores más frecuentes que cometen los alumnos en este tema, con la corrección de cada uno.
+
+━━ 8. RESUMEN DE UNA PÁGINA
+Los puntos más importantes condensados para repasar antes del examen.
+
+━━ 9. BIBLIOGRAFÍA
+Fuentes donde el alumno puede profundizar — solo fuentes académicas, gubernamentales y verificables en formato APA.
+
+TONO: Claro, directo y didáctico. El alumno debe poder aprender leyendo esta guía sin necesidad de otra referencia.`;
+}
+
+
+// ── GUÍA DE ESTUDIO ESPECIAL (clases 4 y 10) ─────────────
+let curGuiaEspId = null;
+
+function openGenGuiaEspecial(cid){
+  const c = clases.find(x=>x.id===cid); if(!c) return;
+  const mat = MATERIAS.find(x=>x.id===c.materiaId);
+  const esParcial1 = c.numero === 4;
+  const label = esParcial1 ? "Guía Parcial 1 · Clases 1-4" : "Guía Parcial 2 · Clases 6-10";
+  curGuiaEspId = cid;
+
+  document.getElementById("guia-esp-title").textContent = "📚 " + label;
+  document.getElementById("guia-esp-sub").textContent = mat.nombre + " · " + mat.grupo;
+  document.getElementById("guia-esp-tema").value = c.guia?.contenidoTema ||
+    (esParcial1
+      ? "Clases 1-4: " + TEMAS[mat.id].slice(0,4).join(" | ")
+      : "Clases 6-10: " + TEMAS[mat.id].slice(5,10).join(" | "));
+
+  const existing = c.guia?.contenido;
+  document.getElementById("guia-esp-result").style.display = existing ? "block" : "none";
+  document.getElementById("guia-esp-save").style.display = existing ? "block" : "none";
+  document.getElementById("guia-esp-result").value = existing || "";
+  document.getElementById("guia-esp-btn").textContent = existing ? "✨ Regenerar" : "✨ Generar Guía con IA";
+  document.getElementById("modal-guia-esp").classList.add("open");
+}
+
+function openViewGuiaEspecial(cid){
+  const c = clases.find(x=>x.id===cid); if(!c) return;
+  const mat = MATERIAS.find(x=>x.id===c.materiaId);
+  curGuiaEspId = cid;
+  const esParcial1 = c.numero === 4;
+  document.getElementById("guia-esp-title").textContent = "📚 " + (esParcial1 ? "Guía Parcial 1" : "Guía Parcial 2");
+  document.getElementById("guia-esp-sub").textContent = mat.nombre;
+  document.getElementById("guia-esp-tema").value = c.guia?.contenidoTema || "";
+  document.getElementById("guia-esp-result").value = c.guia?.contenido || "";
+  document.getElementById("guia-esp-result").style.display = "block";
+  document.getElementById("guia-esp-save").style.display = "block";
+  document.getElementById("guia-esp-btn").textContent = "✨ Regenerar";
+  document.getElementById("modal-guia-esp").classList.add("open");
+}
+
+async function generateGuiaEsp(){
+  const c = clases.find(x=>x.id===curGuiaEspId); if(!c) return;
+  const mat = MATERIAS.find(x=>x.id===c.materiaId);
+  const temas = document.getElementById("guia-esp-tema").value.trim();
+  const esFundamentos = mat.nombre.includes("Negocios Internacionales");
+  const esParcial1 = c.numero === 4;
+  const parcialNum = esParcial1 ? 1 : 2;
+
+  const biblio = esFundamentos ? `
+Bibliografía prioritaria:
+- Daniels, J. D., Radebaugh, L. H. & Sullivan, D. P. (2013). Negocios Internacionales. Pearson.
+- Hill, C. W. L. (2015). Negocios Internacionales: Competencia en el Mercado Global. McGraw-Hill.` : `
+Bibliografía prioritaria:
+- Brealey, R., Myers, S. & Allen, F. (2023). Principles of Corporate Finance, 14a ed. McGraw-Hill.
+- Ross, S., Westerfield, R. & Jordan, B. (2022). Fundamentals of Corporate Finance, 13a ed. McGraw-Hill.
+- Núñez, L. (2004). Estructura Financiera. PAC.
+- Bravo Santillán, M. de la Luz (2007). Introducción a las Finanzas. Pearson.`;
+
+  const prompt = `Eres asistente académico de un profesor de la Universidad Humanitas.
+Materia: "${mat.nombre}"
+Esta es una GUÍA DE ESTUDIO para que los alumnos se preparen para el Parcial ${parcialNum}.
+Temas que cubre: ${temas}
+${biblio}
+
+REGLA DE FUENTES: Solo fuentes académicas, gubernamentales e institucionales verificables. Cita en formato APA.
+
+Genera una GUÍA DE ESTUDIO COMPLETA Y EXHAUSTIVA con la siguiente estructura:
+
+━━ 1. PRESENTACIÓN DE LA GUÍA
+Qué cubre, cómo usarla, qué se evaluará en el parcial.
+
+━━ 2. MAPA DE TEMAS
+Tabla o esquema que muestre todos los temas cubiertos y cómo se relacionan entre sí.
+
+━━ 3. DESARROLLO TEMA POR TEMA
+Para cada tema incluye:
+• Resumen conceptual claro (qué es, para qué sirve)
+• Conceptos clave con definición precisa
+• Ejemplo de aplicación real
+• Lo más importante que debes recordar
+
+━━ 4. PREGUNTAS DE AUTOEVALUACIÓN
+10-12 preguntas variadas (conceptuales, de análisis y de aplicación) que simulen el parcial. Incluye la respuesta correcta de cada una.
+
+━━ 5. CASOS PRÁCTICOS RESUELTOS
+2-3 casos o ejercicios resueltos paso a paso que integren varios temas de la guía.
+
+━━ 6. LO MÁS PROBABLE QUE TE PREGUNTEN
+Lista de los 8-10 conceptos o temas más importantes que suelen evaluarse en parciales de esta materia.
+
+━━ 7. ESTRATEGIA DE ESTUDIO
+Cómo organizar el tiempo de estudio, qué repasar primero, qué materiales complementarios consultar.
+
+━━ 8. BIBLIOGRAFÍA
+Fuentes en formato APA donde el alumno puede profundizar.
+
+TONO: Claro, directo y motivador. Escrito para el alumno, no para el profesor. El alumno debe poder estudiar solo con esta guía.`;
+
+  const btn = document.getElementById("guia-esp-btn");
+  btn.textContent = "✨ Generando guía..."; btn.disabled = true;
+
+  try {
+    // Use Sonnet for ensayo and guia (complex), Haiku for the rest
+    const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
+    const maxTok = docKey==='ensayo' ? 2000 : 800;
+    const res = await fetch("/api/claude",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ model:modelToUse, max_tokens:maxTok, messages:[{role:"user",content:prompt}] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || (data.error ? "Error API: "+data.error.message : "Error en la respuesta");
+    document.getElementById("guia-esp-result").value = text;
+    document.getElementById("guia-esp-result").style.display = "block";
+    document.getElementById("guia-esp-save").style.display = "block";
+  } catch(e) {
+    document.getElementById("guia-esp-result").value = "Error al conectar. Intenta de nuevo.";
+    document.getElementById("guia-esp-result").style.display = "block";
+  }
+  btn.textContent = "✨ Regenerar"; btn.disabled = false;
+}
+
+function saveGuiaEsp(){
+  const contenido = document.getElementById("guia-esp-result").value;
+  const temas = document.getElementById("guia-esp-tema").value;
+  clases = clases.map(c => c.id===curGuiaEspId
+    ? {...c, guia:{status:"listo", contenido, contenidoTema:temas}}
+    : c);
+  persist();
+  closeModal("guia-esp");
+  if(curPage==="clases") renderClases();
+  if(curPage==="hoy") renderHoy();
+}
+
+function resetData(){
+  if(confirm("¿Borrar todos los datos y empezar de nuevo? Esto no se puede deshacer.")){
+    localStorage.removeItem("dm_T2_clases");
+    localStorage.removeItem("dm_T2_guias");
+    localStorage.removeItem("dm_version");
+    location.reload();
+  }
+}
+
+// ── Modal helpers ─────────────────────────────────────
+function closeModal(id){ document.getElementById("modal-"+id).classList.remove("open"); }
+document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(o=>o.classList.remove("open"));});
+
+// ── Version check — clear old data if from previous trimestre ──
+const DASHBOARD_VERSION = "T2-2026";
+if(localStorage.getItem("dm_version") !== DASHBOARD_VERSION){
+  localStorage.removeItem("dm_T2_clases");
+  localStorage.removeItem("dm_T2_guias");
+  localStorage.setItem("dm_version", DASHBOARD_VERSION);
+}
+
+// ── Init ──────────────────────────────────────────────
+renderHoy();
+</script>
+</body>
+</html>
