@@ -699,7 +699,7 @@ async function generateDoc(){
     if(docKey === 'ensayo'){
       // Vercel allows 60s timeout — single call for full essay
       const r = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:modelToUse,max_tokens:3500,messages:[{role:"user",content:prompt}]})});
+        body:JSON.stringify({model:modelToUse,max_tokens:6000,messages:[{role:"user",content:prompt}]})});
       const d = await r.json();
       if(d.error) throw new Error(d.error.message);
       document.getElementById("gen-result").value = d.content?.[0]?.text || "Sin respuesta";
@@ -798,7 +798,7 @@ async function generateGuia(){
     const prompt = buildGuiaPrompt({...g,tema}, m.nombre);
     const res = await fetch("/api/claude",{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:3000, messages:[{role:"user",content:prompt}] })
+      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:6000, messages:[{role:"user",content:prompt}] })
     });
     const data = await res.json();
     const text = data.content?.[0]?.text||"Error";
@@ -937,7 +937,9 @@ TONO Y ESTILO:
 - Académico pero claro y directo. Sin relleno ni frases vacías.
 - Escribe como si estuvieras explicándole al profesor, no al alumno.
 - Cada sección debe ser sustancial — no listas cortas, sino párrafos desarrollados.
-- Los datos siempre con fuente. Los ejemplos siempre con nombre real de empresa.`;
+- Los datos siempre con fuente. Los ejemplos siempre con nombre real de empresa.
+- IMPORTANTE: El ensayo DEBE terminar siempre con la sección 8 BIBLIOGRAFÍA COMPLETA.
+  Si el espacio es limitado, resume las secciones intermedias pero NUNCA omitas la bibliografía.`;
 
   // ── ENSAYO FUNDAMENTOS (2 horas, 1500 palabras) ────
   const ensayo_fundamentos = `${ctx}
@@ -976,7 +978,8 @@ Las 4-5 preguntas más comunes o desafiantes sobre el tema, con respuesta direct
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 4-5 fuentes en formato APA: libros de la bibliografía prioritaria + fuentes institucionales (SE, Banxico, OMC, Banco Mundial).
 
-TONO: Académico, directo, sin relleno. Cada dato con fuente. Ejemplos con nombres reales.`;
+TONO: Académico, directo, sin relleno. Cada dato con fuente. Ejemplos con nombres reales.
+- IMPORTANTE: El ensayo DEBE terminar siempre con la sección BIBLIOGRAFÍA completa en formato APA.`;
 
   // ── PRESENTACIÓN ────────────────────────────────────
   const presentacion = `${ctx}
@@ -1240,7 +1243,7 @@ TONO: Claro, directo y motivador. Escrito para el alumno, no para el profesor. E
   try {
     // Use Sonnet for ensayo and guia (complex), Haiku for the rest
     const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
-    const maxTok = docKey==='ensayo' ? 2000 : 800;
+    const maxTok = docKey==='ensayo' ? 6000 : 800;
     const res = await fetch("/api/claude",{
       method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({ model:modelToUse, max_tokens:maxTok, messages:[{role:"user",content:prompt}] })
