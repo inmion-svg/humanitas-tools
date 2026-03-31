@@ -713,7 +713,7 @@ async function generateDoc(){
       const r2 = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[
           {role:"user",content:p2},
-          {role:"assistant",content:t1 + "\n\n"}
+          {role:"assistant",content:t1.trim()}
         ]})});
       const d2 = await r2.json();
       if(d2.error) throw new Error(d2.error.message);
