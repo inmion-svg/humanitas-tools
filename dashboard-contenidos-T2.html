@@ -697,25 +697,16 @@ async function generateDoc(){
     const modelToUse = (docKey==='ensayo') ? "claude-sonnet-4-20250514" : "claude-haiku-4-5-20251001";
 
     if(docKey === 'ensayo'){
-      // Part 1: sections 1-3
-      const p1 = prompt + "\n\nINSTRUCCION: Genera SOLO las secciones 1, 2 y 3. Se detallado y completo en cada una.";
-      btn.textContent = "✨ Generando (1/2)...";
-      const r1 = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[{role:"user",content:p1}]})});
-      const d1 = await r1.json();
-      if(d1.error) throw new Error(d1.error.message);
-      const t1 = (d1.content?.[0]?.text||"").trim();
-
-      // Part 2: sections 4-8 as independent call
-      const p2 = prompt + "\n\nINSTRUCCION: Genera SOLO las secciones 4, 5, 6, 7 y 8. Empieza con '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n4. DATOS Y ESTADISTICAS ACTUALES'. Termina siempre con la bibliografía completa.";
-      btn.textContent = "✨ Generando (2/2)...";
-      const r2 = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:modelToUse,max_tokens:3000,messages:[{role:"user",content:p2}]})});
-      const d2 = await r2.json();
-      if(d2.error) throw new Error(d2.error.message);
-      const t2 = (d2.content?.[0]?.text||"").trim();
-
-      document.getElementById("gen-result").value = t1 + "\n\n" + t2;
+      // Use Haiku for speed — generates 3-4x faster than Sonnet, fits in 60s timeout
+      const r = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-haiku-4-5-20251001",
+          max_tokens:5000,
+          messages:[{role:"user",content:prompt}]
+        })});
+      const d = await r.json();
+      if(d.error) throw new Error(d.error.message);
+      document.getElementById("gen-result").value = d.content?.[0]?.text || "Sin respuesta";
     } else {
       const res = await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:modelToUse,max_tokens:800,messages:[{role:"user",content:prompt}]})});
